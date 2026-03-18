@@ -11,36 +11,50 @@
         }
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 420px; text-align: center; }
-        .logo-placeholder { width: 80px; height: 80px; margin: 0 auto 15px auto; display: block; }
+        
         h1 { margin: 0; font-size: 1.6rem; color: var(--primary); }
-        .fecha-hoy { color: #7f8c8d; margin: 10px 0; font-size: 1.1rem; text-transform: capitalize; }
-        .placa-hoy { font-size: 5rem; font-weight: bold; padding: 1.2rem; border-radius: 15px; margin: 15px 0; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); display: block; }
+        .fecha-hoy { color: #7f8c8d; margin: 5px 0; font-size: 1.1rem; text-transform: capitalize; }
+        
+        /* Reloj */
+        .reloj { font-size: 1.5rem; font-weight: bold; color: var(--primary); margin: 10px 0; font-family: 'Courier New', Courier, monospace; }
+        .estado-horario { font-size: 0.9rem; font-weight: bold; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 10px; }
+        .activo { background-color: #d4efdf; color: #145a32; }
+        .inactivo { background-color: #ebedef; color: #566573; }
+
+        .placa-hoy { font-size: 5rem; font-weight: bold; padding: 1.2rem; border-radius: 15px; margin: 10px 0; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); display: block; }
+        
         .bg-01 { background-color: var(--green); }
         .bg-23 { background-color: var(--brown); color: white; }
         .bg-45 { background-color: var(--red); }
         .bg-67 { background-color: var(--yellow); color: #333; }
         .bg-89 { background-color: var(--blue); }
         .bg-libre { background-color: #ffffff !important; color: #000000 !important; border: 3px solid var(--primary) !important; text-shadow: none !important; }
-        .proximos-dias { margin-top: 30px; text-align: left; }
+        
+        .proximos-dias { margin-top: 25px; text-align: left; }
         h2 { font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 8px; color: var(--primary); }
-        .dia-fila { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
-        .mini-placa { padding: 5px 15px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; min-width: 65px; text-align: center; }
-        .footer { margin-top: 25px; font-size: 0.8rem; color: #bdc3c7; }
+        .dia-fila { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
+        .mini-placa { padding: 4px 12px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; min-width: 60px; text-align: center; }
+        .footer { margin-top: 20px; font-size: 0.75rem; color: #bdc3c7; line-height: 1.4; }
     </style>
 </head>
 <body>
     <div class="card">
-        <img src="logo.png" alt="" class="logo-placeholder" onerror="this.style.display='none'">
         <h1>Pico y Placa Pasto</h1>
         <div id="fecha-hoy" class="fecha-hoy">Cargando...</div>
-        <p style="margin:0; font-weight: 500;">Restricción para hoy:</p>
+        
+        <div id="reloj" class="reloj">00:00:00</div>
+        <div id="estado" class="estado-horario">Calculando...</div>
+
+        <p style="margin:0; font-weight: 500;">Restricción hoy:</p>
         <div id="placa-hoy-box" class="placa-hoy">--</div>
+
         <div class="proximos-dias">
-            <h2>Próximas Fechas</h2>
+            <h2>Próximos 30 Días</h2>
             <div id="lista-futura"></div>
         </div>
+
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Rotación Semanal Equitativa 2026</p>
+            <p>Horario: 7:30 AM a 7:00 PM<br>Basado en Rotación Semanal 2026<br>Actualización Automática</p>
         </div>
     </div>
 
@@ -53,7 +67,7 @@
             { texto: "8 - 9", clase: "bg-89" }
         ];
 
-        const festivos = ["2026-03-23", "2026-04-02", "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", "2026-06-15", "2026-06-29"];
+        const festivos = ["2026-03-23", "2026-04-02", "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", "2026-06-15", "2026-06-29", "2026-07-20", "2026-08-07", "2026-08-17", "2026-10-12", "2026-11-02", "2026-11-16", "2026-12-08", "2026-12-25"];
 
         function getWeekNumber(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -63,38 +77,55 @@
         }
 
         function obtenerInfo(fecha) {
-            const diaSemana = fecha.getDay(); // 0: Dom, 1: Lun... 5: Vie, 6: Sab
+            const diaSemana = fecha.getDay(); 
             const fechaISO = fecha.toISOString().split('T')[0];
-            
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
-                return { texto: "No aplica", clase: "bg-libre" };
+                return { texto: "LIBRE", clase: "bg-libre" };
             }
-
-            // Lógica de Rotación Semanal Equitativa:
-            // Cada semana el patrón se desplaza un lugar. 
-            // En la semana 12 (Marzo 16-22), el Miércoles es 8-9 (Índice 4).
-            // Esto significa que el Lunes de esa semana fue 4-5.
             const semana = getWeekNumber(fecha);
-            
-            // Calculamos el índice base para el lunes de esa semana
-            // Ajustado para que Semana 12 (Marzo 16) -> Lunes sea índice 2 (4-5)
             let indiceLunes = (semana - 10) % 5; 
             if (indiceLunes < 0) indiceLunes += 5;
-
             let indiceDia = (indiceLunes + (diaSemana - 1)) % 5;
             return secuenciaBase[indiceDia];
+        }
+
+        function actualizarReloj() {
+            const ahora = new Date();
+            const horas = ahora.getHours();
+            const minutos = ahora.getMinutes();
+            
+            // Formatear reloj
+            document.getElementById('reloj').innerText = ahora.toLocaleTimeString('es-CO');
+
+            // Lógica de estado (7:30 AM a 7:00 PM)
+            const estadoDiv = document.getElementById('estado');
+            const totalMinutos = (horas * 60) + minutos;
+            const inicio = (7 * 60) + 30; // 7:30
+            const fin = 19 * 60; // 19:00
+
+            const infoHoy = obtenerInfo(ahora);
+
+            if (totalMinutos >= inicio && totalMinutos < fin && infoHoy.texto !== "LIBRE") {
+                estadoDiv.innerText = "🟢 RESTRICCIÓN ACTIVA";
+                estadoDiv.className = "estado-horario activo";
+            } else {
+                estadoDiv.innerText = "⚪ FUERA DE HORARIO";
+                estadoDiv.className = "estado-horario inactivo";
+            }
         }
 
         function render() {
             const hoy = new Date(); 
             document.getElementById('fecha-hoy').innerText = hoy.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+            
             const infoHoy = obtenerInfo(hoy);
             const box = document.getElementById('placa-hoy-box');
-            box.innerText = infoHoy.texto; box.className = "placa-hoy " + infoHoy.clase;
+            box.innerText = infoHoy.texto; 
+            box.className = "placa-hoy " + infoHoy.clase;
 
             const lista = document.getElementById('lista-futura');
             lista.innerHTML = "";
-            for (let i = 1; i <= 31; i++) {
+            for (let i = 1; i <= 30; i++) {
                 let f = new Date(); f.setDate(hoy.getDate() + i);
                 let info = obtenerInfo(f);
                 let fila = document.createElement('div');
@@ -103,6 +134,9 @@
                 lista.appendChild(fila);
             }
         }
+
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
         render();
     </script>
 </body>
