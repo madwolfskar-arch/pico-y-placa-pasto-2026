@@ -11,7 +11,6 @@
         }
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 420px; text-align: center; }
-        .logo-placeholder { width: 80px; height: 80px; margin: 0 auto 15px auto; display: block; }
         h1 { margin: 0; font-size: 1.6rem; color: var(--primary); }
         .fecha-hoy { color: #7f8c8d; margin: 10px 0; font-size: 1.1rem; text-transform: capitalize; }
         .placa-hoy { font-size: 5rem; font-weight: bold; padding: 1.2rem; border-radius: 15px; margin: 15px 0; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); display: block; }
@@ -30,7 +29,6 @@
 </head>
 <body>
     <div class="card">
-        <img src="logo.png" alt="" class="logo-placeholder" onerror="this.style.display='none'">
         <h1>Pico y Placa Pasto</h1>
         <div id="fecha-hoy" class="fecha-hoy">Cargando...</div>
         <p style="margin:0; font-weight: 500;">Restricción para hoy:</p>
@@ -40,7 +38,7 @@
             <div id="lista-futura"></div>
         </div>
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Sincronización Exacta 2026</p>
+            <p>Horario: 7:30 AM - 7:00 PM<br>Sincronizado con Calendario Oficial</p>
         </div>
     </div>
 
@@ -66,24 +64,18 @@
             const diaSemana = dLocal.getDay(); 
             const fechaISO = dLocal.toISOString().split('T')[0];
 
-            // 1. Fines de semana y Festivos: No aplica
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            // 2. Lógica de Sincronización Duplicada (Igual a la web de referencia):
-            // Lunes 27 de Abril: 8-9 (Índice 4)
-            // Martes 28 de Abril: 0-1 (Índice 0)
-            // Miércoles 29 de Abril (Hoy): 2-3 (Índice 1)
-            // Jueves 30 de Abril: 4-5 (Índice 2)
-            // Lunes 4 de Mayo: 8-9 (Índice 4)
-            
-            const fechaRef = new Date(2026, 3, 27, 12, 0, 0); // Lunes 27 de Abril
+            // REFERENCIA ANCLADA:
+            // Miércoles 29 de Abril = 0-1 (Índice 0)
+            const fechaRef = new Date(2026, 3, 29, 12, 0, 0); 
             const diffMs = dLocal.getTime() - fechaRef.getTime();
             const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-            // Iniciamos en Índice 4 (8-9) para el Lunes 27 y avanzamos linealmente
-            let indice = (4 + diffDias) % 5;
+            // Índice 0 es 0-1. Sumamos la diferencia de días naturales.
+            let indice = (0 + diffDias) % 5;
             while (indice < 0) indice += 5;
 
             return secuenciaBase[indice];
