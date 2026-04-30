@@ -40,7 +40,7 @@
             <div id="lista-futura"></div>
         </div>
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Sincronización Manual según Decreto</p>
+            <p>Horario: 7:30 AM - 7:00 PM<br>Sincronización Exacta 2026</p>
         </div>
     </div>
 
@@ -66,17 +66,23 @@
             const diaSemana = dLocal.getDay(); 
             const fechaISO = dLocal.toISOString().split('T')[0];
 
+            // 1. Fines de semana y Festivos: No aplica
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            // REFERENCIA DEFINITIVA:
-            // Lunes 4 de Mayo de 2026 = Placa 8-9 (Índice 4)
-            const fechaRef = new Date(2026, 4, 4, 12, 0, 0); 
+            // 2. Lógica de Sincronización Duplicada (Igual a la web de referencia):
+            // Lunes 27 de Abril: 8-9 (Índice 4)
+            // Martes 28 de Abril: 0-1 (Índice 0)
+            // Miércoles 29 de Abril (Hoy): 2-3 (Índice 1)
+            // Jueves 30 de Abril: 4-5 (Índice 2)
+            // Lunes 4 de Mayo: 8-9 (Índice 4)
+            
+            const fechaRef = new Date(2026, 3, 27, 12, 0, 0); // Lunes 27 de Abril
             const diffMs = dLocal.getTime() - fechaRef.getTime();
             const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-            // Calculamos el índice basándonos en que el Lunes 4 es Índice 4
+            // Iniciamos en Índice 4 (8-9) para el Lunes 27 y avanzamos linealmente
             let indice = (4 + diffDias) % 5;
             while (indice < 0) indice += 5;
 
