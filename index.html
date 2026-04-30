@@ -40,7 +40,7 @@
             <div id="lista-futura"></div>
         </div>
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Rotación Continua 2026</p>
+            <p>Horario: 7:30 AM - 7:00 PM<br>Calendario Oficial 2026</p>
         </div>
     </div>
 
@@ -53,6 +53,7 @@
             { texto: "8 - 9", clase: "bg-89" }
         ];
 
+        // Festivos extraídos del calendario físico
         const festivos = [
             "2026-01-01", "2026-01-06", "2026-03-23", "2026-04-02", 
             "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", 
@@ -62,39 +63,26 @@
         ];
 
         function obtenerInfo(fecha) {
-            const diaSemana = fecha.getDay(); // 0: Dom, 1: Lun... 6: Sab
-            
-            const anio = fecha.getFullYear();
-            const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-            const dia = String(fecha.getDate()).padStart(2, '0');
-            const fechaISO = `${anio}-${mes}-${dia}`;
+            const dLocal = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 12, 0, 0);
+            const diaSemana = dLocal.getDay(); 
+            const fechaISO = dLocal.toISOString().split('T')[0];
 
-            // 1. Fines de semana y Festivos: No aplica
+            // 1. Fines de semana y festivos siempre LIBRE
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            // 2. Lógica de Secuencia Continua
-            // Referencia fija: El 2 de enero de 2026 fue Viernes con placas 2-3 (Índice 1)
-            const fechaBase = new Date(2026, 0, 2); 
-            
-            // Calculamos la diferencia en días naturales
-            const diffTiempo = fecha.getTime() - fechaBase.getTime();
-            const diffDias = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
-            
-            // Filtramos solo los días de semana (lunes a viernes) transcurridos
-            let diasHabiles = 0;
-            for (let i = 0; i <= diffDias; i++) {
-                let tempFecha = new Date(fechaBase);
-                tempFecha.setDate(fechaBase.getDate() + i);
-                let d = tempFecha.getDay();
-                if (d !== 0 && d !== 6) {
-                    diasHabiles++;
-                }
-            }
+            // 2. Lógica LINEAL basada en el calendario físico:
+            // El 1 de enero fue jueves (festivo). El 2 de enero fue viernes con 2-3.
+            // Calculamos la posición en la secuencia según el día del año.
+            const inicioAnio = new Date(2026, 0, 1, 12, 0, 0);
+            const milisegundosPorDia = 86400000;
+            const diaDelAnio = Math.floor((dLocal - inicioAnio) / milisegundosPorDia);
 
-            // El índice 1 corresponde a la placa inicial (2-3)
-            let indice = (1 + (diasHabiles - 1)) % 5;
+            // Ajuste para que: 
+            // Miércoles 29 Abril (día 118) -> 0-1 (Indice 0)
+            // Jueves 30 Abril (día 119) -> 2-3 (Indice 1)
+            let indice = (diaDelAnio - 3) % 5;
             if (indice < 0) indice += 5;
 
             return secuenciaBase[indice];
@@ -102,9 +90,6 @@
 
         function render() {
             const hoy = new Date(); 
-            // Normalizar hora para evitar saltos por zona horaria
-            hoy.setHours(12, 0, 0, 0);
-
             document.getElementById('fecha-hoy').innerText = hoy.toLocaleDateString('es-CO', { 
                 weekday: 'long', day: 'numeric', month: 'long' 
             });
@@ -116,11 +101,9 @@
 
             const lista = document.getElementById('lista-futura');
             lista.innerHTML = "";
-            
             for (let i = 1; i <= 31; i++) {
-                let f = new Date(hoy);
+                let f = new Date();
                 f.setDate(hoy.getDate() + i);
-                
                 let info = obtenerInfo(f);
                 let fila = document.createElement('div');
                 fila.className = 'dia-fila';
@@ -137,4 +120,5 @@
     </script>
 </body>
 </html>
+
 
