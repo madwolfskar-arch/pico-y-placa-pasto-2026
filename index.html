@@ -10,40 +10,47 @@
             --green: #27ae60; --brown: #6e4b3a; --red: #e74c3c; --yellow: #f1c40f; --blue: #3498db;
         }
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 420px; text-align: center; }
-        h1 { margin: 0; font-size: 1.6rem; color: var(--primary); }
+        .card { background: white; padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
+        h1 { margin: 0; font-size: 1.8rem; color: var(--primary); letter-spacing: -1px; }
         .fecha-hoy { color: #7f8c8d; margin: 10px 0; font-size: 1.1rem; text-transform: capitalize; }
-        .placa-hoy { font-size: 5rem; font-weight: bold; padding: 1.2rem; border-radius: 15px; margin: 15px 0; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); display: block; }
+        .placa-hoy { font-size: 5.5rem; font-weight: bold; padding: 1.5rem; border-radius: 15px; margin: 20px 0; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); display: block; transition: all 0.3s ease; }
+        
+        /* Colores según tu calendario */
         .bg-01 { background-color: var(--green); }
         .bg-23 { background-color: var(--brown); color: white; }
         .bg-45 { background-color: var(--red); }
         .bg-67 { background-color: var(--yellow); color: #333; }
         .bg-89 { background-color: var(--blue); }
-        .bg-libre { background-color: #ffffff !important; color: #000000 !important; border: 3px solid var(--primary) !important; text-shadow: none !important; }
-        .proximos-dias { margin-top: 30px; text-align: left; }
-        h2 { font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 8px; color: var(--primary); }
-        .dia-fila { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
-        .mini-placa { padding: 5px 15px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; min-width: 65px; text-align: center; }
-        .footer { margin-top: 25px; font-size: 0.8rem; color: #bdc3c7; }
+        .bg-libre { background-color: #ffffff !important; color: #2c3e50 !important; border: 4px solid var(--primary) !important; text-shadow: none !important; }
+
+        .proximos-dias { margin-top: 35px; text-align: left; }
+        h2 { font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--primary); margin-bottom: 15px; }
+        .dia-fila { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; }
+        .mini-placa { padding: 6px 16px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; min-width: 75px; text-align: center; }
+        .footer { margin-top: 30px; font-size: 0.85rem; color: #95a5a6; line-height: 1.4; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>Pico y Placa Pasto</h1>
         <div id="fecha-hoy" class="fecha-hoy">Cargando...</div>
-        <p style="margin:0; font-weight: 500;">Restricción para hoy:</p>
+        <p style="margin:0; font-weight: 600; color: #34495e;">Restricción para vehículos:</p>
         <div id="placa-hoy-box" class="placa-hoy">--</div>
+        
         <div class="proximos-dias">
-            <h2>Próximas Fechas</h2>
+            <h2>Calendario Próximos Días</h2>
             <div id="lista-futura"></div>
         </div>
+
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Sincronizado con Calendario Oficial</p>
+            <p><strong>Horario:</strong> 7:30 AM a 7:00 PM<br>
+            Algoritmo de Rotación Continua (Ciclo de 5 días)</p>
         </div>
     </div>
 
     <script>
-        const secuenciaBase = [
+        // Grupos de placas definidos en tu lógica
+        const GRUPOS = [
             { texto: "0 - 1", clase: "bg-01" },
             { texto: "2 - 3", clase: "bg-23" },
             { texto: "4 - 5", clase: "bg-45" },
@@ -51,6 +58,7 @@
             { texto: "8 - 9", clase: "bg-89" }
         ];
 
+        // Festivos parametrizados según el calendario oficial de Colombia 2026
         const festivos = [
             "2026-01-01", "2026-01-06", "2026-03-23", "2026-04-02", 
             "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", 
@@ -59,57 +67,65 @@
             "2026-12-08", "2026-12-25"
         ];
 
-        function obtenerInfo(fecha) {
-            const dLocal = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 12, 0, 0);
-            const diaSemana = dLocal.getDay(); 
-            const fechaISO = dLocal.toISOString().split('T')[0];
+        function obtenerPicoPlaca(fecha) {
+            const d = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 12, 0, 0);
+            const diaSemana = d.getDay(); // 0: Dom, 1: Lun...
+            const fechaISO = d.toISOString().split('T')[0];
 
+            // Condición especial: Sábados, domingos y festivos NO aplica
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
-                return { texto: "No aplica", clase: "bg-libre" };
+                return { texto: "LIBRE", clase: "bg-libre" };
             }
 
-            // REFERENCIA ANCLADA:
-            // Miércoles 29 de Abril = 0-1 (Índice 0)
-            const fechaRef = new Date(2026, 3, 29, 12, 0, 0); 
-            const diffMs = dLocal.getTime() - fechaRef.getTime();
-            const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            // APLICACIÓN DEL ALGORITMO
+            // Para que hoy Miércoles 29 de Abril (Día 118) sea 0-1 (Índice 0):
+            // Ajustamos la FECHA_BASE al 1 de Enero de 2026 con un offset que sincronice el ciclo.
+            const FECHA_BASE = new Date(2026, 0, 1, 12, 0, 0); 
+            const milisegundosPorDia = 86400000;
+            const diasTranscurridos = Math.floor((d - FECHA_BASE) / milisegundosPorDia);
+            
+            // Según tu lógica: indice = dias_transcurridos % 5
+            // Ajuste de desfase para coincidir con el Miércoles 29 = 0-1
+            let indice = (diasTranscurridos + 2) % 5; 
+            if (indice < 0) indice += 5;
 
-            // Índice 0 es 0-1. Sumamos la diferencia de días naturales.
-            let indice = (0 + diffDias) % 5;
-            while (indice < 0) indice += 5;
-
-            return secuenciaBase[indice];
+            return GRUPOS[indice];
         }
 
-        function render() {
-            const hoy = new Date(); 
-            document.getElementById('fecha-hoy').innerText = hoy.toLocaleDateString('es-CO', { 
-                weekday: 'long', day: 'numeric', month: 'long' 
+        function actualizarInterfaz() {
+            const hoy = new Date();
+            const fechaTexto = hoy.toLocaleDateString('es-CO', { 
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
             });
-            
-            const infoHoy = obtenerInfo(hoy);
+            document.getElementById('fecha-hoy').innerText = fechaTexto;
+
+            const resultado = obtenerPicoPlaca(hoy);
             const box = document.getElementById('placa-hoy-box');
-            box.innerText = infoHoy.texto; 
-            box.className = "placa-hoy " + infoHoy.clase;
+            box.innerText = resultado.texto;
+            box.className = "placa-hoy " + resultado.clase;
 
             const lista = document.getElementById('lista-futura');
             lista.innerHTML = "";
-            for (let i = 1; i <= 31; i++) {
-                let f = new Date();
-                f.setDate(hoy.getDate() + i);
-                let info = obtenerInfo(f);
+            
+            // Mostrar los próximos 7 días para verificar la rotación
+            for (let i = 1; i <= 7; i++) {
+                let futura = new Date();
+                futura.setDate(hoy.getDate() + i);
+                let info = obtenerPicoPlaca(futura);
+                
                 let fila = document.createElement('div');
                 fila.className = 'dia-fila';
                 fila.innerHTML = `
-                    <span style="text-transform: capitalize;">
-                        ${f.toLocaleDateString('es-CO', {weekday:'short', day:'numeric', month:'short'})}
+                    <span style="text-transform: capitalize; font-weight: 500;">
+                        ${futura.toLocaleDateString('es-CO', {weekday: 'short', day: 'numeric', month: 'short'})}
                     </span>
                     <span class="mini-placa ${info.clase}">${info.texto}</span>
                 `;
                 lista.appendChild(fila);
             }
         }
-        render();
+
+        actualizarInterfaz();
     </script>
 </body>
 </html>
