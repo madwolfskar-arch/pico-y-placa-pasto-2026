@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pico y Placa Pasto 2026</title>
+
     <style>
         :root {
             --primary: #2c3e50;
@@ -13,25 +14,32 @@
             --yellow: #f1c40f; 
             --blue: #3498db;
         }
+
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Segoe UI', Arial;
+            background: #f4f7f6;
             display: flex;
             justify-content: center;
+            padding: 20px;
         }
+
         .card {
             background: white;
             padding: 2rem;
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 420px;
             text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+
         h1 { margin: 0; color: var(--primary); }
-        .fecha-hoy { color: #7f8c8d; margin: 10px 0; text-transform: capitalize; }
+
+        .fecha-hoy {
+            margin: 10px 0;
+            color: #7f8c8d;
+            text-transform: capitalize;
+        }
 
         .placa-hoy {
             font-size: 4rem;
@@ -67,10 +75,12 @@
         }
     </style>
 </head>
+
 <body>
 
 <div class="card">
     <h1>Pico y Placa Pasto</h1>
+
     <div id="fecha-hoy" class="fecha-hoy"></div>
 
     <div id="placa-hoy-box" class="placa-hoy">--</div>
@@ -80,6 +90,8 @@
 </div>
 
 <script>
+
+// 🔁 Secuencia oficial
 const secuencia = [
     { texto: "0 - 1", clase: "bg-01" },
     { texto: "2 - 3", clase: "bg-23" },
@@ -88,7 +100,7 @@ const secuencia = [
     { texto: "8 - 9", clase: "bg-89" }
 ];
 
-// Festivos Colombia 2026
+// 🇨🇴 Festivos Colombia 2026
 const festivos = [
 "2026-01-01","2026-01-12","2026-03-23","2026-04-02","2026-04-03",
 "2026-05-01","2026-05-18","2026-06-08","2026-06-15","2026-06-29",
@@ -96,30 +108,46 @@ const festivos = [
 "2026-11-16","2026-12-08","2026-12-25"
 ];
 
-// 🔥 FECHA BASE REAL (1 ENERO 2026)
-const fechaBase = new Date(2026, 0, 1);
+// 🔥 Fecha base (día hábil validado)
+const fechaBase = new Date(2026, 0, 2); // 2 enero 2026
 
+// ✔ Validar día hábil
+function esHabil(fecha) {
+    let d = fecha.getDay();
+    let iso = fecha.toISOString().split('T')[0];
+    return !(d === 0 || d === 6 || festivos.includes(iso));
+}
+
+// ✔ Contar días hábiles reales
+function contarHabiles(fecha) {
+
+    let count = 0;
+    let temp = new Date(fechaBase);
+
+    while (temp <= fecha) {
+        if (esHabil(temp)) count++;
+        temp.setDate(temp.getDate() + 1);
+    }
+
+    return count - 1;
+}
+
+// ✔ Obtener pico y placa correcto
 function obtenerPicoPlaca(fecha) {
 
     let f = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 12);
 
-    let dia = f.getDay();
-    let iso = f.toISOString().split('T')[0];
-
-    // Fin de semana o festivo
-    if (dia === 0 || dia === 6 || festivos.includes(iso)) {
+    if (!esHabil(f)) {
         return { texto: "LIBRE", clase: "bg-libre" };
     }
 
-    // Diferencia en días
-    let diff = Math.floor((f - fechaBase) / (1000 * 60 * 60 * 24));
-
-    let indice = diff % 5;
-    if (indice < 0) indice += 5;
+    let dias = contarHabiles(f);
+    let indice = dias % 5;
 
     return secuencia[indice];
 }
 
+// 🎯 Render
 function render() {
 
     let hoy = new Date();
@@ -140,33 +168,40 @@ function render() {
     let lista = document.getElementById("lista");
     lista.innerHTML = "";
 
-    for (let i = 1; i <= 15; i++) {
+    for (let i = 1; i <= 20; i++) {
+
         let f = new Date();
         f.setDate(hoy.getDate() + i);
 
         let info = obtenerPicoPlaca(f);
 
-        let div = document.createElement("div");
-        div.className = "dia-fila";
+        let fila = document.createElement("div");
+        fila.className = "dia-fila";
 
-        div.innerHTML = `
-            <span>${f.toLocaleDateString("es-CO", {
-                weekday: "short",
-                day: "numeric",
-                month: "short"
-            })}</span>
+        fila.innerHTML = `
+            <span>
+                ${f.toLocaleDateString("es-CO", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short"
+                })}
+            </span>
             <span class="mini-placa ${info.clase}">
                 ${info.texto}
             </span>
         `;
 
-        lista.appendChild(div);
+        lista.appendChild(fila);
     }
 }
 
 render();
+
 </script>
 
 </body>
 </html>
+
+
+
 
