@@ -53,53 +53,67 @@
             { texto: "8 - 9", clase: "bg-89" }
         ];
 
-        // Se completó la lista de festivos según el calendario oficial
-        const festivos = ["2026-01-01", "2026-01-06", "2026-03-23", "2026-04-02", "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", "2026-06-15", "2026-06-29", "2026-07-20", "2026-08-07", "2026-08-17", "2026-10-12", "2026-11-02", "2026-11-16", "2026-12-08", "2026-12-25"];
-
-        function getWeekNumber(d) {
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-            var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        }
+        const festivos = [
+            "2026-01-01", "2026-01-06", "2026-03-23", "2026-04-02", 
+            "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", 
+            "2026-06-15", "2026-06-29", "2026-07-20", "2026-08-07",
+            "2026-08-17", "2026-10-12", "2026-11-02", "2026-11-16",
+            "2026-12-08", "2026-12-25"
+        ];
 
         function obtenerInfo(fecha) {
             const diaSemana = fecha.getDay(); 
-            // Ajuste para evitar error de zona horaria al comparar festivos
-            const fechaISO = fecha.toLocaleDateString('sv-SE'); // Formato YYYY-MM-DD local
+            const anio = fecha.getFullYear();
+            const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+            const dia = String(fecha.getDate()).padStart(2, '0');
+            const fechaISO = `${anio}-${mes}-${dia}`;
             
+            // 1. Fines de semana y Festivos: LIBRE
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            const semana = getWeekNumber(fecha);
-            
-            // CORRECCIÓN DE LÓGICA:
-            // Ajustado para que el Jueves 30 de Abril (Semana 18) sea índice 1 (2-3)
-            // Y el Lunes 4 de Mayo (Semana 19) sea índice 2 (4-5)
-            let indiceLunes = (semana - 17) % 5; 
-            if (indiceLunes < 0) indiceLunes += 5;
+            // 2. Lógica Lineal Continua (Referencia: 2 de enero fue 2-3)
+            // Calculamos días desde el inicio del año para mantener la rotación
+            const fechaBase = new Date(2026, 0, 1);
+            const diffDias = Math.floor((fecha - fechaBase) / (1000 * 60 * 60 * 24));
 
-            let indiceDia = (indiceLunes + (diaSemana - 1)) % 5;
-            return secuenciaBase[indiceDia];
+            // Ajuste matemático para sincronizar con el calendario físico
+            let indice = (diffDias - 1) % 5;
+            if (indice < 0) indice += 5;
+
+            return secuenciaBase[indice];
         }
 
         function render() {
             const hoy = new Date(); 
-            document.getElementById('fecha-hoy').innerText = hoy.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+            // Normalizar a mediodía para evitar errores de cálculo por zona horaria
+            hoy.setHours(12, 0, 0, 0);
+
+            document.getElementById('fecha-hoy').innerText = hoy.toLocaleDateString('es-CO', { 
+                weekday: 'long', day: 'numeric', month: 'long' 
+            });
+            
             const infoHoy = obtenerInfo(hoy);
             const box = document.getElementById('placa-hoy-box');
-            box.innerText = infoHoy.texto; box.className = "placa-hoy " + infoHoy.clase;
+            box.innerText = infoHoy.texto; 
+            box.className = "placa-hoy " + infoHoy.clase;
 
             const lista = document.getElementById('lista-futura');
             lista.innerHTML = "";
+            
             for (let i = 1; i <= 31; i++) {
-                let f = new Date(); 
+                let f = new Date(hoy); 
                 f.setDate(hoy.getDate() + i);
                 let info = obtenerInfo(f);
                 let fila = document.createElement('div');
                 fila.className = 'dia-fila';
-                fila.innerHTML = `<span style="text-transform: capitalize;">${f.toLocaleDateString('es-CO', {weekday:'short', day:'numeric', month:'short'})}</span><span class="mini-placa ${info.clase}">${info.texto}</span>`;
+                fila.innerHTML = `
+                    <span style="text-transform: capitalize;">
+                        ${f.toLocaleDateString('es-CO', {weekday:'short', day:'numeric', month:'short'})}
+                    </span>
+                    <span class="mini-placa ${info.clase}">${info.texto}</span>
+                `;
                 lista.appendChild(fila);
             }
         }
@@ -107,6 +121,5 @@
     </script>
 </body>
 </html>
-
 
 
