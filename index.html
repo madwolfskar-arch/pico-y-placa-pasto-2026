@@ -40,7 +40,7 @@
             <div id="lista-futura"></div>
         </div>
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Sincronizado con Calendario Oficial</p>
+            <p>Horario: 7:30 AM - 7:00 PM<br>Basado en el Decreto de Movilidad de Pasto</p>
         </div>
     </div>
 
@@ -63,22 +63,24 @@
 
         function obtenerInfo(fecha) {
             const dLocal = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 12, 0, 0);
-            const diaSemana = dLocal.getDay(); 
+            const diaSemana = dLocal.getDay(); // 0: Dom, 1: Lun... 6: Sab
             const fechaISO = dLocal.toISOString().split('T')[0];
 
+            // 1. Fines de semana y Festivos: No aplica
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            // Sincronización exacta con la realidad:
-            // Lunes 27 de Abril de 2026 fue 8-9 (Índice 4 de la secuencia)
-            const fechaReferencia = new Date(2026, 3, 27, 12, 0, 0); 
-            const milisegundosPorDia = 86400000;
-            const diasDiferencia = Math.floor((dLocal - fechaReferencia) / milisegundosPorDia);
+            // 2. Lógica de Secuencia Ininterrumpida
+            // Usamos un Lunes conocido como base. Lunes 27 de Abril de 2026 fue 8-9.
+            // Para que el cálculo sea robusto, calculamos la diferencia de días totales.
+            const fechaRef = new Date(2026, 3, 27, 12, 0, 0); // Lunes 27 Abril
+            const diffMs = dLocal.getTime() - fechaRef.getTime();
+            const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-            // Calculamos el índice basándonos en que el Lunes 27 es índice 4
-            let indice = (4 + diasDiferencia) % 5;
-            while (indice < 0) indice += 5;
+            // Índice 4 es "8-9". Sumamos la diferencia y usamos módulo 5.
+            let indice = (4 + diffDias) % 5;
+            if (indice < 0) indice += 5;
 
             return secuenciaBase[indice];
         }
@@ -115,5 +117,4 @@
     </script>
 </body>
 </html>
-
 
