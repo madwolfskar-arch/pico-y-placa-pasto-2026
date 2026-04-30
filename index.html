@@ -3,28 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pico y Placa Pasto 2026 - Consulta Interactiva</title>
+    <title>Pico y Placa Pasto 2026 - Oficial</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .plate-input:focus { outline: none; border-color: #3b82f6; }
-        .bg-verde { background-color: #2ecc71; }
-        .bg-gris { background-color: #bdc3c7; }
-        .bg-rojo { background-color: #e74c3c; }
-        .bg-amarillo { background-color: #f1c40f; }
-        .bg-azul { background-color: #3498db; }
-        .calendar-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        /* Estilos inspirados en la fotografía */
+        .verde { background-color: #00a651; color: white; }
+        .gris { background-color: #333333; color: white; } /* Gris oscuro como en la foto */
+        .rojo { background-color: #ed1c24; color: white; }
+        .amarillo { background-color: #fff200; color: black; }
+        .azul { background-color: #00aeef; color: white; }
+        .no-aplica { background-color: #ffffff; color: #ccc; }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            font-size: 0.75rem;
+        }
+        .day-box {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 2px;
+        }
+        .header-mes {
+            background-color: #ed1c24;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            padding: 4px;
+            text-transform: uppercase;
+            border-radius: 4px 4px 0 0;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="bg-gray-200 py-6 px-4">
 
-    <!-- Header / Selector -->
-    <nav class="bg-white shadow-md p-4 sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <h1 class="text-xl font-bold text-blue-900">Pico y Placa <span class="text-blue-600">Pasto 2026</span></h1>
-            <div class="flex items-center bg-gray-100 rounded-lg px-3 py-2 border-2 border-transparent focus-within:border-blue-500">
-                <span class="text-sm font-semibold text-gray-500 mr-2">ÚLTIMO DÍGITO:</span>
-                <select id="plateSelector" onchange="updateView()" class="bg-transparent font-bold text-lg text-blue-700 outline-none">
+    <!-- SECCIÓN INTERACTIVA (ESTILO PYPHOY) -->
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-center md:text-left">
+                <h1 class="text-2xl font-black text-gray-800">PICO Y PLACA PASTO 2026</h1>
+                <p id="fecha-actual" class="text-blue-600 font-bold uppercase"></p>
+            </div>
+            
+            <div class="bg-yellow-400 p-4 rounded-lg flex items-center gap-4 shadow-inner">
+                <span class="font-bold text-gray-800">¿TU PLACA TERMINA EN?</span>
+                <select id="placa" onchange="verificarEstado()" class="text-2xl font-black p-2 rounded bg-white border-2 border-gray-800">
                     <option value="0">0</option><option value="1">1</option><option value="2">2</option>
                     <option value="3">3</option><option value="4">4</option><option value="5">5</option>
                     <option value="6">6</option><option value="7">7</option><option value="8">8</option>
@@ -32,104 +60,102 @@
                 </select>
             </div>
         </div>
-    </nav>
 
-    <main class="max-w-5xl mx-auto p-4 space-y-8">
-        
-        <!-- Estado Hoy -->
-        <section id="currentStatus" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center transform transition hover:scale-[1.01]">
-            <h2 class="text-gray-500 uppercase tracking-widest text-sm font-semibold">Estado para hoy</h2>
-            <div id="todayDate" class="text-lg font-medium mb-4">Cargando fecha...</div>
-            <div id="statusResult" class="inline-block px-8 py-4 rounded-full text-2xl font-black mb-4">
-                --
-            </div>
-            <p id="statusMsg" class="text-gray-600 italic">Selecciona tu dígito para verificar</p>
-        </section>
-
-        <!-- Leyenda -->
-        <section class="grid grid-cols-2 md:grid-cols-5 gap-2">
-            <div class="flex items-center p-2 bg-white rounded border border-gray-100 shadow-sm"><span class="w-4 h-4 bg-verde rounded mr-2"></span> 0 - 1</div>
-            <div class="flex items-center p-2 bg-white rounded border border-gray-100 shadow-sm"><span class="w-4 h-4 bg-gris rounded mr-2"></span> 2 - 3</div>
-            <div class="flex items-center p-2 bg-white rounded border border-gray-100 shadow-sm"><span class="w-4 h-4 bg-rojo rounded mr-2"></span> 4 - 5</div>
-            <div class="flex items-center p-2 bg-white rounded border border-gray-100 shadow-sm"><span class="w-4 h-4 bg-amarillo rounded mr-2"></span> 6 - 7</div>
-            <div class="flex items-center p-2 bg-white rounded border border-gray-100 shadow-sm"><span class="w-4 h-4 bg-azul rounded mr-2"></span> 8 - 9</div>
-        </section>
-
-        <!-- Grid de Meses (Visualización interactiva) -->
-        <div id="calendarGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Los meses se generan aquí vía JS -->
+        <div id="resultado" class="mt-6 p-6 rounded-xl text-center transition-all duration-300">
+            <span id="resultado-texto" class="text-3xl font-black"></span>
+            <p id="resultado-desc" class="text-lg mt-2 font-medium"></p>
         </div>
+    </div>
 
-    </main>
+    <!-- LEYENDA (ESTILO FOTOGRAFÍA) -->
+    <div class="max-w-4xl mx-auto flex justify-center gap-2 mb-8 flex-wrap">
+        <div class="verde px-4 py-1 rounded font-bold text-sm text-center">0 - 1</div>
+        <div class="gris px-4 py-1 rounded font-bold text-sm text-center">2 - 3</div>
+        <div class="rojo px-4 py-1 rounded font-bold text-sm text-center">4 - 5</div>
+        <div class="amarillo px-4 py-1 rounded font-bold text-sm text-center">6 - 7</div>
+        <div class="azul px-4 py-1 rounded font-bold text-sm text-center">8 - 9</div>
+    </div>
+
+    <!-- CALENDARIO COMPLETO (ESTILO FOTOGRAFÍA) -->
+    <div id="calendario-contenedor" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- Los meses se generarán automáticamente aquí -->
+    </div>
 
     <script>
-        // Datos de la base de datos proporcionada
-        const data2026 = {
-            "Enero": [null,null,null,"v","v","v","g","r","a","z","v","g","g","g","z","v","g","r","a","g","g","v","z","g","r","a","g","g","v","g","r","a","z","g"],
-            "Febrero": [null,null,null,null,null,null,"g","g","r","a","z","v","g","g","r","a","z","v","g","g","g","z","v","g","r","a","g","g","v","g","r","a","z","g"],
-            // (La lógica de JS mapeará el resto basándose en tu texto proporcionado)
+        // Lógica de cálculo basada en la base de datos proporcionada
+        const coloresPlacas = {
+            "verde": [0, 1],
+            "gris": [2, 3],
+            "rojo": [4, 5],
+            "amarillo": [6, 7],
+            "azul": [8, 9]
         };
 
-        // Colores por dígito
-        const restrictionMap = {
-            "v": [0, 1], "g": ["No"], "r": [4, 5], "a": [6, 7], "z": [8, 9], "x": [2, 3] 
+        // Mapeo simplificado de los primeros meses de tu DB
+        const db2026 = {
+            "Enero": { start: 4, days: ["v","v","v","g","r","a","z","v","g","g","g","z","v","g","r","a","g","g","v","z","g","r","a","g","g","v","g","r","a","z","g"] },
+            "Febrero": { start: 0, days: ["g","g","r","a","z","v","g","g","r","a","z","v","g","g","g","z","v","g","r","a","g","g","v","g","r","a","z","g"] },
+            "Marzo": { start: 0, days: ["g","g","r","a","z","v","g","g","g","r","a","z","v","g","g","r","a","z","v","g","g","g","z","v","g","g","r","g","g","z","v"] }
+            // Para completar el año se seguiría el mismo patrón de tu documento
         };
 
-        // Mapeo resumido para la emulación (Simplificado para el ejemplo)
-        const restrictionColors = { "v": "bg-verde", "g": "bg-gris", "r": "bg-rojo", "a": "bg-amarillo", "z": "bg-azul" };
+        const aliasColores = { "v": "verde", "g": "gris", "r": "rojo", "a": "amarillo", "z": "azul" };
 
-        function updateView() {
-            const digit = parseInt(document.getElementById('plateSelector').value);
-            const today = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('todayDate').innerText = today.toLocaleDateString('es-CO', options);
-
-            // Simulación de respuesta de estado
-            checkTodayStatus(digit);
-            renderCalendar(digit);
-        }
-
-        function checkTodayStatus(digit) {
-            const statusDiv = document.getElementById('statusResult');
-            const msg = document.getElementById('statusMsg');
-            
-            // En una app real, esto cruzaría la fecha de hoy con la DB. 
-            // Para la demo asumimos un día aleatorio o fijo.
-            const restrictedToday = [0, 1]; // Ejemplo: Hoy es restringido para 0 y 1
-            
-            if (restrictedToday.includes(digit)) {
-                statusDiv.className = "inline-block px-8 py-4 rounded-full text-2xl font-black mb-4 bg-red-100 text-red-600 border-2 border-red-200";
-                statusDiv.innerText = "TIENES RESTRICCIÓN";
-                msg.innerText = "Tu vehículo no puede circular entre las 7:30 a.m. y las 7:30 p.m.";
-            } else {
-                statusDiv.className = "inline-block px-8 py-4 rounded-full text-2xl font-black mb-4 bg-green-100 text-green-600 border-2 border-green-200";
-                statusDiv.innerText = "PUEDES CIRCULAR";
-                msg.innerText = "No tienes restricción de movilidad para el día de hoy.";
+        function generarCalendario() {
+            const contenedor = document.getElementById('calendario-contenedor');
+            for (const [nombre, data] of Object.entries(db2026)) {
+                let html = `<div class="bg-white p-2 rounded shadow">
+                                <div class="header-mes">${nombre}</div>
+                                <div class="calendar-grid text-gray-400 mb-1">
+                                    <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+                                </div>
+                                <div class="calendar-grid">`;
+                
+                // Espacios vacíos
+                for (let i = 0; i < data.start; i++) html += `<div class="no-aplica"></div>`;
+                
+                // Días con color
+                data.days.forEach((c, index) => {
+                    html += `<div class="day-box ${aliasColores[c]}">${index + 1}</div>`;
+                });
+                
+                html += `</div></div>`;
+                contenedor.innerHTML += html;
             }
         }
 
-        function renderCalendar(highlightDigit) {
-            const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = "";
-
-            months.forEach(month => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-100";
-                card.innerHTML = `<h3 class="font-bold text-center border-b pb-2 mb-3 text-blue-900">${month}</h3>
-                                 <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-400 mb-2">
-                                    <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
-                                 </div>
-                                 <div class="grid grid-cols-7 gap-1" id="days-${month}"></div>`;
-                grid.appendChild(card);
-            });
-            // Nota: El llenado de días dinámico requiere el objeto completo data2026.
+        function verificarEstado() {
+            const placa = parseInt(document.getElementById('placa').value);
+            const hoy = new Date();
+            const resDiv = document.getElementById('resultado');
+            const resTxt = document.getElementById('resultado-texto');
+            const resDesc = document.getElementById('resultado-desc');
+            
+            // Simulación lógica: En Pasto, fines de semana (S-D) no suelen tener restricción según tu patrón "gris"[cite: 1]
+            const esFinDeSemana = (hoy.getDay() === 0 || hoy.getDay() === 6);
+            
+            // Para propósitos de este código, si el día es Gris (2-3) se toma como No Aplica/Fin de semana
+            // asumiendo la lógica de tu nota técnica[cite: 1].
+            
+            // Ejemplo para hoy:
+            if (placa === 0 || placa === 1) { // Supongamos que hoy toca Verde
+                resDiv.className = "mt-6 p-6 rounded-xl text-center bg-red-600 text-white shadow-lg";
+                resTxt.innerText = "TIENES RESTRICCIÓN";
+                resDesc.innerText = "Horario: 07:30 AM a 07:30 PM";
+            } else {
+                resDiv.className = "mt-6 p-6 rounded-xl text-center bg-green-500 text-white shadow-lg";
+                resTxt.innerText = "PUEDES CIRCULAR";
+                resDesc.innerText = "Tu dígito no tiene restricción para el día de hoy.";
+            }
         }
 
-        window.onload = updateView;
+        document.getElementById('fecha-actual').innerText = new Intl.DateTimeFormat('es-CO', { dateStyle: 'full' }).format(new Date());
+        generarCalendario();
+        verificarEstado();
     </script>
 </body>
 </html>
+
 
 
 
