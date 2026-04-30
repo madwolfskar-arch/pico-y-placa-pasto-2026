@@ -40,7 +40,7 @@
             <div id="lista-futura"></div>
         </div>
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Calendario Oficial 2026</p>
+            <p>Horario: 7:30 AM - 7:00 PM<br>Sincronizado con Calendario Oficial</p>
         </div>
     </div>
 
@@ -53,7 +53,6 @@
             { texto: "8 - 9", clase: "bg-89" }
         ];
 
-        // Festivos extraídos del calendario físico
         const festivos = [
             "2026-01-01", "2026-01-06", "2026-03-23", "2026-04-02", 
             "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", 
@@ -67,23 +66,19 @@
             const diaSemana = dLocal.getDay(); 
             const fechaISO = dLocal.toISOString().split('T')[0];
 
-            // 1. Fines de semana y festivos siempre LIBRE
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            // 2. Lógica LINEAL basada en el calendario físico:
-            // El 1 de enero fue jueves (festivo). El 2 de enero fue viernes con 2-3.
-            // Calculamos la posición en la secuencia según el día del año.
-            const inicioAnio = new Date(2026, 0, 1, 12, 0, 0);
+            // Sincronización exacta con la realidad:
+            // Lunes 27 de Abril de 2026 fue 8-9 (Índice 4 de la secuencia)
+            const fechaReferencia = new Date(2026, 3, 27, 12, 0, 0); 
             const milisegundosPorDia = 86400000;
-            const diaDelAnio = Math.floor((dLocal - inicioAnio) / milisegundosPorDia);
+            const diasDiferencia = Math.floor((dLocal - fechaReferencia) / milisegundosPorDia);
 
-            // Ajuste para que: 
-            // Miércoles 29 Abril (día 118) -> 0-1 (Indice 0)
-            // Jueves 30 Abril (día 119) -> 2-3 (Indice 1)
-            let indice = (diaDelAnio - 3) % 5;
-            if (indice < 0) indice += 5;
+            // Calculamos el índice basándonos en que el Lunes 27 es índice 4
+            let indice = (4 + diasDiferencia) % 5;
+            while (indice < 0) indice += 5;
 
             return secuenciaBase[indice];
         }
