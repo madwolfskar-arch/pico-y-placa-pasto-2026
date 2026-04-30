@@ -40,7 +40,7 @@
             <div id="lista-futura"></div>
         </div>
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Basado en el Decreto de Movilidad de Pasto</p>
+            <p>Horario: 7:30 AM - 7:00 PM<br>Rotación Continua 2026</p>
         </div>
     </div>
 
@@ -63,7 +63,7 @@
 
         function obtenerInfo(fecha) {
             const dLocal = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 12, 0, 0);
-            const diaSemana = dLocal.getDay(); // 0: Dom, 1: Lun... 6: Sab
+            const diaSemana = dLocal.getDay(); 
             const fechaISO = dLocal.toISOString().split('T')[0];
 
             // 1. Fines de semana y Festivos: No aplica
@@ -71,16 +71,15 @@
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            // 2. Lógica de Secuencia Ininterrumpida
-            // Usamos un Lunes conocido como base. Lunes 27 de Abril de 2026 fue 8-9.
-            // Para que el cálculo sea robusto, calculamos la diferencia de días totales.
-            const fechaRef = new Date(2026, 3, 27, 12, 0, 0); // Lunes 27 Abril
+            // 2. Lógica de Secuencia Circular Correcta
+            // Referencia: Miércoles 29 de Abril (Hoy) es 0-1 (Índice 0)
+            const fechaRef = new Date(2026, 3, 29, 12, 0, 0); 
             const diffMs = dLocal.getTime() - fechaRef.getTime();
             const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-            // Índice 4 es "8-9". Sumamos la diferencia y usamos módulo 5.
-            let indice = (4 + diffDias) % 5;
-            if (indice < 0) indice += 5;
+            // Calculamos el índice: (Diferencia de días naturales) % 5
+            let indice = (0 + diffDias) % 5;
+            while (indice < 0) indice += 5;
 
             return secuenciaBase[indice];
         }
