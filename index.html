@@ -40,7 +40,7 @@
             <div id="lista-futura"></div>
         </div>
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Rotación Semanal Equitativa 2026</p>
+            <p>Horario: 7:30 AM - 7:00 PM<br>Rotación Continua 2026</p>
         </div>
     </div>
 
@@ -62,24 +62,39 @@
         ];
 
         function obtenerInfo(fecha) {
-            const diaSemana = fecha.getDay(); 
+            const diaSemana = fecha.getDay(); // 0: Dom, 1: Lun... 6: Sab
+            
             const anio = fecha.getFullYear();
             const mes = String(fecha.getMonth() + 1).padStart(2, '0');
             const dia = String(fecha.getDate()).padStart(2, '0');
             const fechaISO = `${anio}-${mes}-${dia}`;
-            
-            // 1. Fines de semana y Festivos: LIBRE
+
+            // 1. Fines de semana y Festivos: No aplica
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            // 2. Lógica Lineal Continua (Referencia: 2 de enero fue 2-3)
-            // Calculamos días desde el inicio del año para mantener la rotación
-            const fechaBase = new Date(2026, 0, 1);
-            const diffDias = Math.floor((fecha - fechaBase) / (1000 * 60 * 60 * 24));
+            // 2. Lógica de Secuencia Continua
+            // Referencia fija: El 2 de enero de 2026 fue Viernes con placas 2-3 (Índice 1)
+            const fechaBase = new Date(2026, 0, 2); 
+            
+            // Calculamos la diferencia en días naturales
+            const diffTiempo = fecha.getTime() - fechaBase.getTime();
+            const diffDias = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
+            
+            // Filtramos solo los días de semana (lunes a viernes) transcurridos
+            let diasHabiles = 0;
+            for (let i = 0; i <= diffDias; i++) {
+                let tempFecha = new Date(fechaBase);
+                tempFecha.setDate(fechaBase.getDate() + i);
+                let d = tempFecha.getDay();
+                if (d !== 0 && d !== 6) {
+                    diasHabiles++;
+                }
+            }
 
-            // Ajuste matemático para sincronizar con el calendario físico
-            let indice = (diffDias - 1) % 5;
+            // El índice 1 corresponde a la placa inicial (2-3)
+            let indice = (1 + (diasHabiles - 1)) % 5;
             if (indice < 0) indice += 5;
 
             return secuenciaBase[indice];
@@ -87,7 +102,7 @@
 
         function render() {
             const hoy = new Date(); 
-            // Normalizar a mediodía para evitar errores de cálculo por zona horaria
+            // Normalizar hora para evitar saltos por zona horaria
             hoy.setHours(12, 0, 0, 0);
 
             document.getElementById('fecha-hoy').innerText = hoy.toLocaleDateString('es-CO', { 
@@ -103,8 +118,9 @@
             lista.innerHTML = "";
             
             for (let i = 1; i <= 31; i++) {
-                let f = new Date(hoy); 
+                let f = new Date(hoy);
                 f.setDate(hoy.getDate() + i);
+                
                 let info = obtenerInfo(f);
                 let fila = document.createElement('div');
                 fila.className = 'dia-fila';
@@ -121,5 +137,4 @@
     </script>
 </body>
 </html>
-
 
