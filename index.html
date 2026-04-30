@@ -40,7 +40,7 @@
             <div id="lista-futura"></div>
         </div>
         <div class="footer">
-            <p>Horario: 7:30 AM - 7:00 PM<br>Rotación Continua 2026</p>
+            <p>Horario: 7:30 AM - 7:00 PM<br>Sincronización Manual según Decreto</p>
         </div>
     </div>
 
@@ -66,19 +66,18 @@
             const diaSemana = dLocal.getDay(); 
             const fechaISO = dLocal.toISOString().split('T')[0];
 
-            // 1. Fines de semana y Festivos: No aplica
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            // 2. Lógica de Secuencia Circular Correcta
-            // Referencia: Miércoles 29 de Abril (Hoy) es 0-1 (Índice 0)
-            const fechaRef = new Date(2026, 3, 29, 12, 0, 0); 
+            // REFERENCIA DEFINITIVA:
+            // Lunes 4 de Mayo de 2026 = Placa 8-9 (Índice 4)
+            const fechaRef = new Date(2026, 4, 4, 12, 0, 0); 
             const diffMs = dLocal.getTime() - fechaRef.getTime();
             const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-            // Calculamos el índice: (Diferencia de días naturales) % 5
-            let indice = (0 + diffDias) % 5;
+            // Calculamos el índice basándonos en que el Lunes 4 es Índice 4
+            let indice = (4 + diffDias) % 5;
             while (indice < 0) indice += 5;
 
             return secuenciaBase[indice];
