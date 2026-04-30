@@ -53,7 +53,8 @@
             { texto: "8 - 9", clase: "bg-89" }
         ];
 
-        const festivos = ["2026-03-23", "2026-04-02", "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", "2026-06-15", "2026-06-29"];
+        // Se completó la lista de festivos según el calendario oficial
+        const festivos = ["2026-01-01", "2026-01-06", "2026-03-23", "2026-04-02", "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", "2026-06-15", "2026-06-29", "2026-07-20", "2026-08-07", "2026-08-17", "2026-10-12", "2026-11-02", "2026-11-16", "2026-12-08", "2026-12-25"];
 
         function getWeekNumber(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -63,22 +64,20 @@
         }
 
         function obtenerInfo(fecha) {
-            const diaSemana = fecha.getDay(); // 0: Dom, 1: Lun... 5: Vie, 6: Sab
-            const fechaISO = fecha.toISOString().split('T')[0];
+            const diaSemana = fecha.getDay(); 
+            // Ajuste para evitar error de zona horaria al comparar festivos
+            const fechaISO = fecha.toLocaleDateString('sv-SE'); // Formato YYYY-MM-DD local
             
             if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
                 return { texto: "No aplica", clase: "bg-libre" };
             }
 
-            // Lógica de Rotación Semanal Equitativa:
-            // Cada semana el patrón se desplaza un lugar. 
-            // En la semana 12 (Marzo 16-22), el Miércoles es 8-9 (Índice 4).
-            // Esto significa que el Lunes de esa semana fue 4-5.
             const semana = getWeekNumber(fecha);
             
-            // Calculamos el índice base para el lunes de esa semana
-            // Ajustado para que Semana 12 (Marzo 16) -> Lunes sea índice 2 (4-5)
-            let indiceLunes = (semana - 10) % 5; 
+            // CORRECCIÓN DE LÓGICA:
+            // Ajustado para que el Jueves 30 de Abril (Semana 18) sea índice 1 (2-3)
+            // Y el Lunes 4 de Mayo (Semana 19) sea índice 2 (4-5)
+            let indiceLunes = (semana - 17) % 5; 
             if (indiceLunes < 0) indiceLunes += 5;
 
             let indiceDia = (indiceLunes + (diaSemana - 1)) % 5;
@@ -95,7 +94,8 @@
             const lista = document.getElementById('lista-futura');
             lista.innerHTML = "";
             for (let i = 1; i <= 31; i++) {
-                let f = new Date(); f.setDate(hoy.getDate() + i);
+                let f = new Date(); 
+                f.setDate(hoy.getDate() + i);
                 let info = obtenerInfo(f);
                 let fila = document.createElement('div');
                 fila.className = 'dia-fila';
