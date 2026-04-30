@@ -1,132 +1,84 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pico y Placa Pasto 2026</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --green: #27ae60; --brown: #6e4b3a; --red: #e74c3c; --yellow: #f1c40f; --blue: #3498db;
-        }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: white; padding: 2.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
-        h1 { margin: 0; font-size: 1.8rem; color: var(--primary); letter-spacing: -1px; }
-        .fecha-hoy { color: #7f8c8d; margin: 10px 0; font-size: 1.1rem; text-transform: capitalize; }
-        .placa-hoy { font-size: 5.5rem; font-weight: bold; padding: 1.5rem; border-radius: 15px; margin: 20px 0; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); display: block; transition: all 0.3s ease; }
-        
-        /* Colores según tu calendario */
-        .bg-01 { background-color: var(--green); }
-        .bg-23 { background-color: var(--brown); color: white; }
-        .bg-45 { background-color: var(--red); }
-        .bg-67 { background-color: var(--yellow); color: #333; }
-        .bg-89 { background-color: var(--blue); }
-        .bg-libre { background-color: #ffffff !important; color: #2c3e50 !important; border: 4px solid var(--primary) !important; text-shadow: none !important; }
+import matplotlib.pyplot as plt
+import calendar
+from datetime import datetime, timedelta
 
-        .proximos-dias { margin-top: 35px; text-align: left; }
-        h2 { font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 10px; color: var(--primary); margin-bottom: 15px; }
-        .dia-fila { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1; }
-        .mini-placa { padding: 6px 16px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; min-width: 75px; text-align: center; }
-        .footer { margin-top: 30px; font-size: 0.85rem; color: #95a5a6; line-height: 1.4; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>Pico y Placa Pasto</h1>
-        <div id="fecha-hoy" class="fecha-hoy">Cargando...</div>
-        <p style="margin:0; font-weight: 600; color: #34495e;">Restricción para vehículos:</p>
-        <div id="placa-hoy-box" class="placa-hoy">--</div>
-        
-        <div class="proximos-dias">
-            <h2>Calendario Próximos Días</h2>
-            <div id="lista-futura"></div>
-        </div>
+# CONFIGURACIÓN
+AÑO = 2026
 
-        <div class="footer">
-            <p><strong>Horario:</strong> 7:30 AM a 7:00 PM<br>
-            Algoritmo de Rotación Continua (Ciclo de 5 días)</p>
-        </div>
-    </div>
+GRUPOS = [
+    (0, 1),
+    (2, 3),
+    (4, 5),
+    (6, 7),
+    (8, 9)
+]
 
-    <script>
-        // Grupos de placas definidos en tu lógica
-        const GRUPOS = [
-            { texto: "0 - 1", clase: "bg-01" },
-            { texto: "2 - 3", clase: "bg-23" },
-            { texto: "4 - 5", clase: "bg-45" },
-            { texto: "6 - 7", clase: "bg-67" },
-            { texto: "8 - 9", clase: "bg-89" }
-        ];
+COLORES = {
+    0: "#2ecc71",  # verde
+    1: "#bdc3c7",  # gris
+    2: "#e74c3c",  # rojo
+    3: "#f1c40f",  # amarillo
+    4: "#3498db"   # azul
+}
 
-        // Festivos parametrizados según el calendario oficial de Colombia 2026
-        const festivos = [
-            "2026-01-01", "2026-01-06", "2026-03-23", "2026-04-02", 
-            "2026-04-03", "2026-05-01", "2026-05-18", "2026-06-08", 
-            "2026-06-15", "2026-06-29", "2026-07-20", "2026-08-07",
-            "2026-08-17", "2026-10-12", "2026-11-02", "2026-11-16",
-            "2026-12-08", "2026-12-25"
-        ];
+COLOR_FIN_SEMANA = "#2c3e50"
 
-        function obtenerPicoPlaca(fecha) {
-            const d = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 12, 0, 0);
-            const diaSemana = d.getDay(); // 0: Dom, 1: Lun...
-            const fechaISO = d.toISOString().split('T')[0];
+# Fecha base (ajustable según calendario oficial)
+FECHA_BASE = datetime(AÑO, 1, 1)
 
-            // Condición especial: Sábados, domingos y festivos NO aplica
-            if (diaSemana === 0 || diaSemana === 6 || festivos.includes(fechaISO)) {
-                return { texto: "LIBRE", clase: "bg-libre" };
-            }
 
-            // APLICACIÓN DEL ALGORITMO
-            // Para que hoy Miércoles 29 de Abril (Día 118) sea 0-1 (Índice 0):
-            // Ajustamos la FECHA_BASE al 1 de Enero de 2026 con un offset que sincronice el ciclo.
-            const FECHA_BASE = new Date(2026, 0, 1, 12, 0, 0); 
-            const milisegundosPorDia = 86400000;
-            const diasTranscurridos = Math.floor((d - FECHA_BASE) / milisegundosPorDia);
-            
-            // Según tu lógica: indice = dias_transcurridos % 5
-            // Ajuste de desfase para coincidir con el Miércoles 29 = 0-1
-            let indice = (diasTranscurridos + 2) % 5; 
-            if (indice < 0) indice += 5;
+def obtener_indice(fecha):
+    if fecha.weekday() >= 5:
+        return None
+    dias = (fecha - FECHA_BASE).days
+    return dias % 5
 
-            return GRUPOS[indice];
-        }
 
-        function actualizarInterfaz() {
-            const hoy = new Date();
-            const fechaTexto = hoy.toLocaleDateString('es-CO', { 
-                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
-            });
-            document.getElementById('fecha-hoy').innerText = fechaTexto;
+def dibujar_mes(ax, año, mes):
+    cal = calendar.monthcalendar(año, mes)
+    ax.set_title(calendar.month_name[mes].upper(), fontsize=10, fontweight='bold')
+    ax.axis('off')
 
-            const resultado = obtenerPicoPlaca(hoy);
-            const box = document.getElementById('placa-hoy-box');
-            box.innerText = resultado.texto;
-            box.className = "placa-hoy " + resultado.clase;
+    for fila, semana in enumerate(cal):
+        for col, dia in enumerate(semana):
+            if dia == 0:
+                continue
 
-            const lista = document.getElementById('lista-futura');
-            lista.innerHTML = "";
-            
-            // Mostrar los próximos 7 días para verificar la rotación
-            for (let i = 1; i <= 7; i++) {
-                let futura = new Date();
-                futura.setDate(hoy.getDate() + i);
-                let info = obtenerPicoPlaca(futura);
-                
-                let fila = document.createElement('div');
-                fila.className = 'dia-fila';
-                fila.innerHTML = `
-                    <span style="text-transform: capitalize; font-weight: 500;">
-                        ${futura.toLocaleDateString('es-CO', {weekday: 'short', day: 'numeric', month: 'short'})}
-                    </span>
-                    <span class="mini-placa ${info.clase}">${info.texto}</span>
-                `;
-                lista.appendChild(fila);
-            }
-        }
+            fecha = datetime(año, mes, dia)
 
-        actualizarInterfaz();
-    </script>
-</body>
-</html>
+            if fecha.weekday() >= 5:
+                color = COLOR_FIN_SEMANA
+                texto = str(dia)
+            else:
+                idx = obtener_indice(fecha)
+                color = COLORES[idx]
+                grupo = GRUPOS[idx]
+                texto = f"{dia}"
 
+            rect = plt.Rectangle((col, -fila), 1, 1, color=color)
+            ax.add_patch(rect)
+
+            ax.text(col + 0.5, -fila + 0.5, texto,
+                    ha='center', va='center', fontsize=8, color='white')
+
+    ax.set_xlim(0, 7)
+    ax.set_ylim(-len(cal), 1)
+
+
+def generar_calendario():
+    fig, axes = plt.subplots(4, 3, figsize=(10, 12))
+    fig.suptitle("PICO Y PLACA PASTO - " + str(AÑO), fontsize=16)
+
+    mes = 1
+    for i in range(4):
+        for j in range(3):
+            dibujar_mes(axes[i, j], AÑO, mes)
+            mes += 1
+
+    plt.tight_layout()
+    plt.savefig("calendario_pico_placa.png", dpi=300)
+    plt.show()
+
+
+if __name__ == "__main__":
+    generar_calendario()
