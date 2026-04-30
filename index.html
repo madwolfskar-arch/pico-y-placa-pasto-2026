@@ -1,204 +1,94 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pico y Placa Pasto 2026</title>
+<title>En mantenimiento</title>
 
 <style>
-:root {
-    --primary: #2c3e50;
-    --green: #27ae60; 
-    --brown: #6e4b3a; 
-    --red: #e74c3c; 
-    --yellow: #f1c40f; 
-    --blue: #3498db;
-}
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+    }
 
-body {
-    font-family: 'Segoe UI', Arial;
-    background: #f4f7f6;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-}
+    .contenedor {
+        background: rgba(255,255,255,0.05);
+        padding: 40px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        max-width: 420px;
+    }
 
-.card {
-    background: white;
-    padding: 2rem;
-    border-radius: 20px;
-    width: 100%;
-    max-width: 420px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
 
-h1 { margin: 0; color: var(--primary); }
+    p {
+        color: #ecf0f1;
+        font-size: 1rem;
+    }
 
-.fecha-hoy {
-    margin: 10px 0;
-    color: #7f8c8d;
-    text-transform: capitalize;
-}
+    .icono {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
 
-.placa-hoy {
-    font-size: 4rem;
-    font-weight: bold;
-    padding: 1rem;
-    border-radius: 15px;
-    margin: 15px 0;
-    color: white;
-}
+    .footer {
+        margin-top: 20px;
+        font-size: 0.8rem;
+        color: #bdc3c7;
+    }
 
-.bg-01 { background: var(--green); }
-.bg-23 { background: var(--brown); }
-.bg-45 { background: var(--red); }
-.bg-67 { background: var(--yellow); color:#333;}
-.bg-89 { background: var(--blue); }
+    .spinner {
+        margin: 20px auto;
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255,255,255,0.2);
+        border-top: 4px solid #ffffff;
+        border-radius: 50%;
+        animation: girar 1s linear infinite;
+    }
 
-.bg-libre {
-    background: #fff;
-    color: #000;
-    border: 2px solid var(--primary);
-}
-
-.dia-fila {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-}
-
-.mini-placa {
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-weight: bold;
-}
+    @keyframes girar {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-    <h1>Pico y Placa Pasto</h1>
-    <div id="fecha-hoy" class="fecha-hoy"></div>
-    <div id="placa-hoy-box" class="placa-hoy">--</div>
+<div class="contenedor">
+    
+    <div class="icono">🛠️</div>
 
-    <h3>Próximos días</h3>
-    <div id="lista"></div>
+    <h1>Sitio en mantenimiento</h1>
+
+    <p>
+        Estamos realizando mejoras para brindarte un mejor servicio.<br>
+        Por favor, vuelve a intentarlo más tarde.
+    </p>
+
+    <div class="spinner"></div>
+
+    <div class="footer">
+        © 2026 ZODION Servicios Ambientales Colombia
+    </div>
+
 </div>
-
-<script>
-
-// 🔁 Secuencia real
-const secuencia = [
-    { texto: "0 - 1", clase: "bg-01" },
-    { texto: "2 - 3", clase: "bg-23" },
-    { texto: "4 - 5", clase: "bg-45" },
-    { texto: "6 - 7", clase: "bg-67" },
-    { texto: "8 - 9", clase: "bg-89" }
-];
-
-// 🇨🇴 Festivos 2026
-const festivos = [
-"2026-01-01","2026-01-12","2026-03-23","2026-04-02","2026-04-03",
-"2026-05-01","2026-05-18","2026-06-08","2026-06-15","2026-06-29",
-"2026-07-20","2026-08-07","2026-08-17","2026-10-12","2026-11-02",
-"2026-11-16","2026-12-08","2026-12-25"
-];
-
-// 🔥 FECHA BASE CORRECTA (AJUSTADA A LA IMAGEN)
-const fechaBase = new Date(2026, 0, 5); // ← ESTA ES LA CLAVE
-
-function esHabil(fecha) {
-    let d = fecha.getDay();
-    let iso = fecha.toISOString().split('T')[0];
-    return !(d === 0 || d === 6 || festivos.includes(iso));
-}
-
-// 🔥 Conteo SOLO de días hábiles
-function contarHabiles(fecha) {
-    let count = 0;
-    let temp = new Date(fechaBase);
-
-    while (temp <= fecha) {
-        if (esHabil(temp)) count++;
-        temp.setDate(temp.getDate() + 1);
-    }
-
-    return count - 1;
-}
-
-// 🔥 Lógica FINAL
-function obtenerPicoPlaca(fecha) {
-
-    let f = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), 12);
-
-    if (!esHabil(f)) {
-        return { texto: "LIBRE", clase: "bg-libre" };
-    }
-
-    let dias = contarHabiles(f);
-
-    let indice = dias % 5;
-
-    return secuencia[indice];
-}
-
-// 🎯 Render
-function render() {
-
-    let hoy = new Date();
-
-    document.getElementById("fecha-hoy").innerText =
-        hoy.toLocaleDateString("es-CO", {
-            weekday: "long",
-            day: "numeric",
-            month: "long"
-        });
-
-    let infoHoy = obtenerPicoPlaca(hoy);
-
-    let box = document.getElementById("placa-hoy-box");
-    box.innerText = infoHoy.texto;
-    box.className = "placa-hoy " + infoHoy.clase;
-
-    let lista = document.getElementById("lista");
-    lista.innerHTML = "";
-
-    for (let i = 1; i <= 20; i++) {
-
-        let f = new Date();
-        f.setDate(hoy.getDate() + i);
-
-        let info = obtenerPicoPlaca(f);
-
-        let fila = document.createElement("div");
-        fila.className = "dia-fila";
-
-        fila.innerHTML = `
-            <span>
-                ${f.toLocaleDateString("es-CO", {
-                    weekday: "short",
-                    day: "numeric",
-                    month: "short"
-                })}
-            </span>
-            <span class="mini-placa ${info.clase}">
-                ${info.texto}
-            </span>
-        `;
-
-        lista.appendChild(fila);
-    }
-}
-
-render();
-
-</script>
 
 </body>
 </html>
-
-
+```
 
 
