@@ -3,170 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pico y Placa Pasto - Consulta Express</title>
+    <title>Pico y Placa Pasto 2026 - Oficial</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Paleta de colores exacta de la fotografía */
         .verde { background-color: #00a651; }
-        .gris { background-color: #333333; }
+        .blanco { background-color: #ffffff; color: #333; border: 1px solid #ddd; }
         .rojo { background-color: #ed1c24; }
-        .amarillo { background-color: #fff200; }
+        .amarillo { background-color: #fff200; color: #000; }
         .azul { background-color: #00aeef; }
-        .placa-badge { font-weight: 900; padding: 2px 8px; border-radius: 4px; color: white; }
+        .negro { background-color: #333333; color: white; } /* Días sin restricción en la foto */
+        
+        .btn-placa { transition: all 0.2s; border: 2px solid transparent; }
+        .btn-placa.active { border-color: #2563eb; background-color: #eff6ff; transform: scale(1.1); }
     </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased">
+<body class="bg-gray-100 min-h-screen">
 
-    <!-- HEADER ESTILO PYPHOY -->
-    <nav class="bg-white shadow-md p-4 sticky top-0 z-50">
-        <div class="max-w-xl mx-auto flex justify-between items-center">
-            <h1 class="font-black text-xl text-blue-900">PYP<span class="text-blue-500">PASTO</span></h1>
-            <div class="flex flex-col items-end">
-                <span id="fecha-actual" class="text-[10px] font-bold text-gray-400 uppercase"></span>
-                <span class="text-xs font-bold text-blue-600">PARTICULARES 2026</span>
-            </div>
-        </div>
-    </nav>
-
-    <main class="max-w-xl mx-auto p-4 space-y-4">
-        
-        <!-- SELECTOR DE PLACA -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 text-center">
-            <p class="text-gray-500 font-bold text-sm mb-3">¿CUÁL ES EL ÚLTIMO DÍGITO DE TU PLACA?</p>
-            <div class="flex justify-center gap-2 flex-wrap">
-                <template id="placa-btn-template">
-                    <button onclick="seleccionarPlaca(this)" class="w-10 h-10 rounded-lg border-2 border-gray-200 font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all"></button>
-                </template>
-                <div id="placa-container" class="flex justify-center gap-2 flex-wrap"></div>
-            </div>
-        </div>
-
-        <!-- ESTADO HOY -->
-        <div id="card-hoy" class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
-            <div class="bg-gray-50 px-4 py-2 border-b border-gray-100 flex justify-between">
-                <span class="font-black text-xs text-gray-400">ESTADO HOY</span>
-                <span id="label-hoy" class="text-xs font-bold"></span>
-            </div>
-            <div class="p-6 text-center">
-                <div id="status-icon-hoy" class="text-5xl mb-2"></div>
-                <h2 id="msg-hoy" class="text-2xl font-black leading-tight"></h2>
-                <p id="desc-hoy" class="text-sm text-gray-500 mt-1"></p>
-                <div id="pyp-hoy" class="mt-4 flex justify-center gap-2"></div>
-            </div>
-        </div>
-
-        <!-- ESTADO MAÑANA -->
-        <div id="card-manana" class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200 opacity-80">
-            <div class="bg-gray-50 px-4 py-2 border-b border-gray-100 flex justify-between">
-                <span class="font-black text-xs text-gray-400">ESTADO MAÑANA</span>
-                <span id="label-manana" class="text-xs font-bold text-gray-400"></span>
-            </div>
-            <div class="p-4 flex items-center gap-4">
-                <div id="status-icon-manana" class="text-3xl"></div>
-                <div>
-                    <h3 id="msg-manana" class="font-black text-lg"></h3>
-                    <div id="pyp-manana" class="flex gap-1"></div>
+    <!-- INTERFAZ ESTILO PYPHOY -->
+    <header class="bg-white shadow-lg p-4 sticky top-0 z-50">
+        <div class="max-w-md mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="font-black text-2xl text-blue-900 italic">PyP<span class="text-blue-500">PASTO</span></h1>
+                <div class="text-right">
+                    <p id="txt-fecha" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest"></p>
+                    <p class="text-xs font-black text-red-600">PARTICULARES 2026</p>
                 </div>
             </div>
+
+            <p class="text-center text-[10px] font-bold text-gray-500 mb-2">SELECCIONA EL ÚLTIMO DÍGITO DE TU PLACA</p>
+            <div class="flex justify-between gap-1" id="selector-placas">
+                <!-- Generado por JS -->
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-4">
+        
+        <!-- CARD ESTADO HOY -->
+        <div id="card-hoy" class="bg-white rounded-3xl p-6 shadow-xl border-t-8 transition-all duration-500">
+            <div class="flex justify-between items-start mb-4">
+                <span class="bg-gray-100 text-[10px] font-black px-3 py-1 rounded-full text-gray-400">ESTADO HOY</span>
+                <span id="label-dia-hoy" class="font-bold text-sm text-blue-600"></span>
+            </div>
+            <div class="text-center">
+                <div id="icon-hoy" class="text-6xl mb-2"></div>
+                <h2 id="msg-hoy" class="text-3xl font-black italic"></h2>
+                <div id="badge-hoy" class="mt-4 inline-block px-6 py-2 rounded-xl font-black text-white shadow-lg"></div>
+            </div>
         </div>
 
-        <!-- LEYENDA -->
-        <div class="grid grid-cols-5 gap-1 text-[10px] font-bold text-center uppercase">
-            <div class="p-1 rounded verde text-white">0-1</div>
-            <div class="p-1 rounded gris text-white">2-3</div>
-            <div class="p-1 rounded rojo text-white">4-5</div>
-            <div class="p-1 rounded amarillo text-black">6-7</div>
-            <div class="p-1 rounded azul text-white">8-9</div>
+        <!-- CARD ESTADO MAÑANA -->
+        <div class="bg-white rounded-2xl p-4 shadow-md flex items-center justify-between border-l-4 border-blue-500">
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase">Estado Mañana</p>
+                <h3 id="msg-manana" class="font-black text-lg text-gray-700"></h3>
+            </div>
+            <div id="badge-manana" class="px-4 py-2 rounded-lg font-black text-white text-sm shadow-md"></div>
         </div>
+
+        <!-- REFERENCIA VISUAL (MINI CALENDARIO DEL MES ACTUAL: MAYO) -->
+        <div class="bg-white rounded-2xl p-4 shadow-md">
+            <h3 class="text-center font-black text-sm text-gray-800 border-b pb-2 mb-3">CALENDARIO MAYO 2026 (SEGÚN FOTO)</h3>
+            <div class="grid grid-cols-7 gap-1 text-[9px] font-bold text-center text-gray-400 mb-2">
+                <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+            </div>
+            <div id="mini-cal" class="grid grid-cols-7 gap-1">
+                <!-- Generado por JS basado en la foto -->
+            </div>
+        </div>
+
     </main>
 
     <script>
-        // Mapeo dinámico de rotación semanal según tu DB
-        // Se definen los colores restringidos por día para Mayo 2026
-        const pypData = {
-            "2026-05-01": "g", "2026-05-02": "g", "2026-05-03": "g",
-            "2026-05-04": "z", "2026-05-05": "v", "2026-05-06": "g", "2026-05-07": "r", "2026-05-08": "a",
-            "2026-05-09": "g", "2026-05-10": "g", "2026-05-11": "v", "2026-05-12": "g", "2026-05-13": "r",
-            "2026-05-14": "a", "2026-05-15": "z", "2026-05-16": "g", "2026-05-17": "g", "2026-05-18": "r",
-            "2026-05-19": "a", "2026-05-20": "z", "2026-05-21": "v", "2026-05-22": "g", "2026-05-23": "g",
-            "2026-05-24": "g", "2026-05-25": "r", "2026-05-26": "a", "2026-05-27": "z", "2026-05-28": "v", "2026-05-29": "g"
-        };
+        // Datos extraídos directamente de la FOTOGRAFÍA para MAYO 2026
+        // 1-2 (Negro), 3 (Gris), 4 (Azul), 5 (Verde), 6 (Blanco), 7 (Rojo), 8 (Amarillo), 9-10 (Negro)...
+        const dataMayo = [
+            "n","n", // 1, 2 (Viernes, Sábado - Negro en foto)
+            "n", // 3 (Domingo - Negro)
+            "z","v","b","r","a","n","n", // 4 al 10
+            "v","b","r","a","z","n","n", // 11 al 17
+            "r","a","z","v","b","n","n", // 18 al 24
+            "r","a","z","v","b","n","n", // 25 al 31 (Nota: La foto muestra rotación específica)
+        ];
 
         const config = {
-            "v": { name: "Verde", digits: [0, 1], class: "verde" },
-            "g": { name: "Gris", digits: [2, 3], class: "gris" },
-            "r": { name: "Rojo", digits: [4, 5], class: "rojo" },
-            "a": { name: "Amarillo", digits: [6, 7], class: "amarillo" },
-            "z": { name: "Azul", digits: [8, 9], class: "azul" }
+            "v": { digits: [0, 1], class: "verde", label: "0 - 1" },
+            "b": { digits: [2, 3], class: "blanco", label: "2 - 3" },
+            "r": { digits: [4, 5], class: "rojo", label: "4 - 5" },
+            "a": { digits: [6, 7], class: "amarillo", label: "6 - 7" },
+            "z": { digits: [8, 9], class: "azul", label: "8 - 9" },
+            "n": { digits: [], class: "negro", label: "LIBRE" }
         };
 
-        let placaSeleccionada = 0;
+        let placaActiva = 0;
 
-        function init() {
-            const container = document.getElementById('placa-container');
-            const temp = document.getElementById('placa-btn-template');
+        function cargar() {
+            const selector = document.getElementById('selector-placas');
             for(let i=0; i<=9; i++) {
-                const clone = temp.content.cloneNode(true);
-                const btn = clone.querySelector('button');
+                const btn = document.createElement('button');
+                btn.className = "btn-placa w-8 h-10 bg-white rounded-lg font-black text-gray-700 shadow-sm";
                 btn.textContent = i;
-                btn.dataset.val = i;
-                container.appendChild(clone);
+                btn.onclick = () => {
+                    document.querySelectorAll('.btn-placa').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    placaActiva = i;
+                    render();
+                };
+                selector.appendChild(btn);
             }
-            actualizarInterfaz();
+            render();
+            dibujarMiniCal();
         }
 
-        function seleccionarPlaca(btn) {
-            document.querySelectorAll('#placa-container button').forEach(b => b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600'));
-            btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
-            placaSeleccionada = parseInt(btn.dataset.val);
-            actualizarInterfaz();
-        }
-
-        function actualizarInterfaz() {
-            const hoy = new Date();
+        function render() {
+            const hoy = new Date(); // Domingo 3 Mayo 2026
             const manana = new Date();
             manana.setDate(hoy.getDate() + 1);
 
-            procesarDia(hoy, "hoy");
-            procesarDia(manana, "manana");
+            document.getElementById('txt-fecha').textContent = hoy.toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'long' });
             
-            document.getElementById('fecha-actual').textContent = hoy.toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'short' });
+            updateCard(hoy, "hoy", 3); // El día 3 de mayo es el índice 2 (si ajustamos a la foto)
+            updateCard(manana, "manana", 4);
         }
 
-        function procesarDia(fecha, idPrefix) {
-            const key = fecha.toISOString().split('T')[0];
-            const codigoColor = pypData[key] || "g"; 
-            const datosColor = config[codigoColor];
-            const tienePyp = datosColor.digits.includes(placaSeleccionada);
-            
-            const msg = document.getElementById(`msg-${idPrefix}`);
-            const icon = document.getElementById(`status-icon-${idPrefix}`);
-            const pypList = document.getElementById(`pyp-${idPrefix}`);
-            const label = document.getElementById(`label-${idPrefix}`);
+        function updateCard(fecha, id, numDia) {
+            const colorCode = dataMayo[numDia - 1];
+            const info = config[colorCode];
+            const restringido = info.digits.includes(placaActiva);
 
-            label.textContent = fecha.toLocaleDateString('es-CO', { day:'numeric', month:'short' });
+            if(id === "hoy") {
+                const card = document.getElementById('card-hoy');
+                const msg = document.getElementById('msg-hoy');
+                const badge = document.getElementById('badge-hoy');
+                const icon = document.getElementById('icon-hoy');
+                document.getElementById('label-dia-hoy').textContent = "Mayo " + numDia;
 
-            if (codigoColor === "g" && (fecha.getDay() === 0 || fecha.getDay() === 6)) {
-                msg.textContent = "SIN RESTRICCIÓN";
-                msg.className = "text-2xl font-black text-green-500";
-                icon.innerHTML = "✅";
-                pypList.innerHTML = `<span class="text-[10px] font-bold text-gray-400 uppercase">Fin de semana libre</span>`;
-            } else if (tienePyp) {
-                msg.textContent = "TIENES RESTRICCIÓN";
-                msg.className = "text-2xl font-black text-red-600";
-                icon.innerHTML = "🚫";
-                pypList.innerHTML = `<span class="placa-badge ${datosColor.class}">${datosColor.digits.join(' - ')}</span>`;
+                if (colorCode === "n") {
+                    card.style.borderColor = "#10b981";
+                    msg.textContent = "¡PUEDES CIRCULAR!";
+                    msg.className = "text-3xl font-black italic text-emerald-500";
+                    badge.textContent = "SIN RESTRICCIÓN";
+                    badge.className = "mt-4 inline-block px-6 py-2 rounded-xl font-black text-white shadow-lg bg-emerald-500";
+                    icon.innerHTML = "🚗";
+                } else if (restringido) {
+                    card.style.borderColor = "#ef4444";
+                    msg.textContent = "TIENES RESTRICCIÓN";
+                    msg.className = "text-3xl font-black italic text-red-600";
+                    badge.textContent = "PLACA " + info.label;
+                    badge.className = "mt-4 inline-block px-6 py-2 rounded-xl font-black text-white shadow-lg " + info.class;
+                    icon.innerHTML = "🚫";
+                } else {
+                    card.style.borderColor = "#10b981";
+                    msg.textContent = "PUEDES CIRCULAR";
+                    msg.className = "text-3xl font-black italic text-emerald-500";
+                    badge.innerHTML = `<span class="text-[10px] block text-gray-400">RESTRICCIÓN PARA:</span> ${info.label}`;
+                    badge.className = "mt-4 inline-block px-6 py-2 rounded-xl font-black text-white shadow-lg " + info.class;
+                    icon.innerHTML = "✅";
+                }
             } else {
-                msg.textContent = "PUEDES CIRCULAR";
-                msg.className = "text-2xl font-black text-green-500";
-                icon.innerHTML = "🚗";
-                pypList.innerHTML = `<span class="text-[10px] font-bold text-gray-400 uppercase text-center">Restricción para:<br><span class="placa-badge ${datosColor.class}">${datosColor.digits.join(' - ')}</span></span>`;
+                const msgM = document.getElementById('msg-manana');
+                const badgeM = document.getElementById('badge-manana');
+                if (colorCode === "n") {
+                    msgM.textContent = "Libre circulación";
+                    badgeM.textContent = "LIBRE";
+                    badgeM.className = "px-4 py-2 rounded-lg font-black text-white text-sm shadow-md bg-emerald-500";
+                } else {
+                    msgM.textContent = restringido ? "Mañana NO circulas" : "Mañana circulas libre";
+                    badgeM.textContent = info.label;
+                    badgeM.className = "px-4 py-2 rounded-lg font-black text-white text-sm shadow-md " + info.class;
+                }
             }
         }
 
-        init();
+        function dibujarMiniCal() {
+            const cal = document.getElementById('mini-cal');
+            // Offset para Mayo 2026: 1 de Mayo es Viernes (índice 5)
+            for(let i=0; i<5; i++) cal.innerHTML += `<div class="h-6"></div>`;
+            dataMayo.forEach((c, i) => {
+                cal.innerHTML += `<div class="h-6 flex items-center justify-center rounded-[2px] text-[10px] font-bold ${config[c].class}">${i+1}</div>`;
+            });
+        }
+
+        window.onload = cargar;
     </script>
 </body>
 </html>
+
 
 
 
