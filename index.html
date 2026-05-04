@@ -3,45 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pico y Placa Pasto 2026 - Extendido</title>
+    <title>Pico y Placa Pasto 2026 - En Vivo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Paleta de colores con alto contraste basada en la fotografía */
-        .v-verde { background-color: #00813d; color: white; } /* Verde más oscuro para contraste */
-        .v-gris { background-color: #d1d5db; color: #111827; } /* Gris plata en lugar de blanco */
+        .v-verde { background-color: #00813d; color: white; }
+        .v-gris { background-color: #d1d5db; color: #111827; }
         .v-rojo { background-color: #c8102e; color: white; }
         .v-amarillo { background-color: #facc15; color: #111827; }
         .v-azul { background-color: #0077b6; color: white; }
         .v-ninguno { background-color: #f3f4f6; color: #9ca3af; }
-        
         .hidden-days { display: none; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
 
     <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl">
-        <!-- HEADER -->
+        <!-- HEADER DINÁMICO -->
         <header class="p-6 border-b bg-white sticky top-0 z-10">
             <h1 class="text-xl font-bold text-gray-900 leading-tight">Pico y placa <span class="text-blue-600 font-black italic text-2xl">particulares</span> en Pasto</h1>
-            <p class="text-sm text-gray-500 font-bold mt-1">Hoy domingo, 3 de mayo de 2026</p>
-            <p class="text-[11px] text-gray-400 mt-2">Restricción por último dígito de placa según calendario oficial.</p>
+            <p id="txt-hoy-header" class="text-sm text-gray-500 font-bold mt-1 capitalize"></p>
+            <p class="text-[11px] text-gray-400 mt-2 italic">Actualizado según calendario oficial de Nariño.</p>
         </header>
 
-        <!-- CARD HOY -->
-        <section class="p-4">
-            <div class="rounded-3xl p-6 flex flex-col items-center justify-center text-center bg-emerald-50 border border-emerald-100">
-                <div class="text-5xl mb-2">🚗</div>
-                <p class="text-gray-500 font-bold text-xs uppercase tracking-widest">Hoy domingo</p>
-                <p class="text-gray-400 text-[10px] mb-2">2026-05-03</p>
-                <h2 class="text-2xl font-black text-emerald-700">NO HAY RESTRICCIÓN</h2>
-                <span class="mt-3 px-6 py-1 bg-white border border-emerald-200 rounded-full text-emerald-700 text-xs font-black shadow-sm">No aplica</span>
-            </div>
+        <!-- CARD ESTADO ACTUAL (SIEMPRE EL DÍA VIGENTE) -->
+        <section class="p-4" id="seccion-hoy">
+            <!-- Se genera dinámicamente -->
         </section>
 
-        <!-- LISTADO DE DÍAS (ROTACIÓN DE LA FOTO) -->
+        <!-- LISTADO DE DÍAS FUTUROS -->
         <section class="px-6 pb-6">
             <div id="lista-pyp" class="divide-y divide-gray-100">
-                <!-- Se inyecta vía JS -->
+                <!-- Se filtran los días pasados automáticamente -->
             </div>
 
             <button id="btn-ver-mas" onclick="mostrarMasDias()" class="w-full mt-4 py-4 text-blue-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors rounded-xl border-2 border-dashed border-blue-100">
@@ -51,8 +43,9 @@
     </div>
 
     <script>
-        // Datos extraídos de la fotografía[cite: 1]
-        const calendarioMayo = [
+        // Base de datos completa basada en la rotación de la fotografía
+        const dbCalendario = [
+            { fecha: "2026-05-03", dia: "domingo", placas: "No aplica", col: "v-ninguno" },
             { fecha: "2026-05-04", dia: "lunes", placas: "8-9", col: "v-azul" },
             { fecha: "2026-05-05", dia: "martes", placas: "0-1", col: "v-verde" },
             { fecha: "2026-05-06", dia: "miércoles", placas: "2-3", col: "v-gris" },
@@ -64,21 +57,48 @@
             { fecha: "2026-05-12", dia: "martes", placas: "2-3", col: "v-gris" },
             { fecha: "2026-05-13", dia: "miércoles", placas: "4-5", col: "v-rojo" },
             { fecha: "2026-05-14", dia: "jueves", placas: "6-7", col: "v-amarillo" },
-            { fecha: "2026-05-15", dia: "viernes", placas: "8-9", col: "v-azul" },
-            { fecha: "2026-05-16", dia: "sábado", placas: "No aplica", col: "v-ninguno" },
-            { fecha: "2026-05-17", dia: "domingo", placas: "No aplica", col: "v-ninguno" }
+            { fecha: "2026-05-15", dia: "viernes", placas: "8-9", col: "v-azul" }
         ];
 
-        let extendido = false;
+        function actualizarVista() {
+            const ahora = new Date();
+            // Ajuste de zona horaria para Colombia (UTC-5) para consistencia en la comparación
+            const hoyISO = ahora.toLocaleDateString('en-CA'); 
+            
+            // 1. Actualizar Header
+            const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('txt-hoy-header').innerText = "Hoy " + ahora.toLocaleDateString('es-CO', opciones);
 
-        function renderLista() {
-            const contenedor = document.getElementById('lista-pyp');
-            contenedor.innerHTML = "";
+            // 2. Filtrar base de datos para eliminar días anteriores a hoy
+            const datosVigentes = dbCalendario.filter(item => item.fecha >= hoyISO);
 
-            calendarioMayo.forEach((item, index) => {
+            if (datosVigentes.length === 0) return;
+
+            // 3. Renderizar Card Principal (El primer elemento de la lista filtrada)
+            const hoyInfo = datosVigentes[0];
+            const secHoy = document.getElementById('seccion-hoy');
+            const esLibre = hoyInfo.placas === "No aplica";
+
+            secHoy.innerHTML = `
+                <div class="rounded-3xl p-6 flex flex-col items-center justify-center text-center ${esLibre ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'} border">
+                    <div class="text-5xl mb-2">${esLibre ? '🚗' : '🚫'}</div>
+                    <p class="text-gray-500 font-bold text-xs uppercase tracking-widest">Hoy ${hoyInfo.dia}</p>
+                    <p class="text-gray-400 text-[10px] mb-2">${hoyInfo.fecha}</p>
+                    <h2 class="text-2xl font-black ${esLibre ? 'text-emerald-700' : 'text-red-700'}">${esLibre ? 'NO HAY RESTRICCIÓN' : 'RESTRICCIÓN ACTIVA'}</h2>
+                    <span class="mt-3 px-6 py-1 bg-white border rounded-full text-xs font-black shadow-sm ${esLibre ? 'text-emerald-700 border-emerald-200' : 'text-red-700 border-red-200'}">
+                        ${esLibre ? 'No aplica' : 'Placas ' + hoyInfo.placas}
+                    </span>
+                </div>
+            `;
+
+            // 4. Renderizar Lista de Días Siguientes (Mañana en adelante)
+            const lista = document.getElementById('lista-pyp');
+            lista.innerHTML = "";
+            const diasSiguientes = datosVigentes.slice(1);
+
+            diasSiguientes.forEach((item, index) => {
                 const esManana = index === 0;
-                const esOculto = index > 6;
-                
+                const esOculto = index > 5;
                 const div = document.createElement('div');
                 div.className = `flex items-center justify-between py-4 ${esOculto ? 'hidden-days' : ''}`;
                 
@@ -87,38 +107,33 @@
                         <span class="${esManana ? 'text-blue-600 font-black' : 'text-gray-800 font-bold'} text-sm capitalize">
                             ${esManana ? 'Mañana ' + item.dia : item.dia}
                         </span>
-                        <span class="text-[10px] text-gray-400 font-medium tracking-wide">${item.fecha}</span>
+                        <span class="text-[10px] text-gray-400 font-medium">${item.fecha}</span>
                     </div>
                     <div>
                         ${item.placas === "No aplica" 
-                            ? `<span class="text-xs font-bold text-gray-300">No aplica</span>`
+                            ? `<span class="text-xs font-bold text-gray-300 font-black">Libre</span>`
                             : `<span class="px-4 py-1.5 rounded-lg font-black text-sm shadow-md block text-center min-w-[60px] ${item.col}">${item.placas}</span>`
                         }
                     </div>
                 `;
-                contenedor.appendChild(div);
+                lista.appendChild(div);
             });
         }
 
+        let extendido = false;
         function mostrarMasDias() {
             const ocultos = document.querySelectorAll('.hidden-days');
             const btnTexto = document.getElementById('btn-texto');
-            
-            if (!extendido) {
-                ocultos.forEach(el => el.style.display = 'flex');
-                btnTexto.innerText = "↑ Ver menos días";
-                extendido = true;
-            } else {
-                ocultos.forEach(el => el.style.display = 'none');
-                btnTexto.innerText = "↓ Ver más días";
-                extendido = false;
-            }
+            extendido = !extendido;
+            ocultos.forEach(el => el.style.display = extendido ? 'flex' : 'none');
+            btnTexto.innerText = extendido ? "↑ Ver menos días" : "↓ Ver más días";
         }
 
-        window.onload = renderLista;
+        window.onload = actualizarVista;
     </script>
 </body>
 </html>
+
 
 
 
