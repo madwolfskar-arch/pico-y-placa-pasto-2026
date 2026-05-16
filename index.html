@@ -6,76 +6,110 @@
     <title>Pico y Placa Pasto 2026 - En Vivo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Paleta de colores con alto contraste basada en la fotografía */
+        /* Paletas de colores con alto contraste */
         .v-verde { background-color: #00813d; color: white; }
         .v-gris { background-color: #d1d5db; color: #111827; }
         .v-rojo { background-color: #c8102e; color: white; }
         .v-amarillo { background-color: #facc15; color: #111827; }
         .v-azul { background-color: #0077b6; color: white; }
         .v-ninguno { background-color: #f3f4f6; color: #9ca3af; }
-        .hidden-days { display: none; }
         
-        /* Aumento de tamaño específico para los números de placa */
         .numero-placa-grande {
-            font-size: 1.25rem; /* Tamaño aumentado para mayor visibilidad */
+            font-size: 1.25rem;
             line-height: 1.75rem;
         }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
 
-    <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl">
-        <header class="p-6 border-b bg-white sticky top-0 z-10">
-            <h1 class="text-xl font-bold text-gray-900 leading-tight">Pico y placa <span class="text-blue-600 font-black italic text-2xl">particulares</span> en Pasto</h1>
-            <p id="txt-hoy-header" class="text-sm text-gray-500 font-bold mt-1 capitalize"></p>
-            <p class="text-[11px] text-gray-400 mt-2 italic">Actualizado según calendario oficial de Nariño.</p>
-        </header>
+    <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl flex flex-col justify-between">
+        <div>
+            <header class="p-6 border-b bg-white sticky top-0 z-10">
+                <h1 class="text-xl font-bold text-gray-900 leading-tight">Pico y placa <span class="text-blue-600 font-black italic text-2xl">particulares</span> en Pasto</h1>
+                <p id="txt-hoy-header" class="text-sm text-gray-500 font-bold mt-1 capitalize"></p>
+                <p class="text-[11px] text-gray-400 mt-2 italic">Actualizado automáticamente según calendario oficial.</p>
+            </header>
 
-        <section class="p-4" id="seccion-hoy">
-            <!-- Renderizado dinámico -->
-        </section>
+            <section class="p-4" id="seccion-hoy">
+                </section>
 
-        <section class="px-6 pb-6">
-            <div id="lista-pyp" class="divide-y divide-gray-100">
-                <!-- Listado filtrado automáticamente -->
-            </div>
+            <section class="px-6 pb-6">
+                <div id="lista-pyp" class="divide-y divide-gray-100">
+                    </div>
 
-            <button id="btn-ver-mas" onclick="mostrarMasDias()" class="w-full mt-4 py-4 text-blue-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors rounded-xl border-2 border-dashed border-blue-100">
-                <span id="btn-texto">↓ Ver más días</span>
-            </button>
-        </section>
+                <button id="btn-ver-mas" onclick="alternarDias()" class="w-full mt-4 py-4 text-blue-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors rounded-xl border-2 border-dashed border-blue-100">
+                    <span id="btn-texto">↓ Ver más días</span>
+                </button>
+            </section>
+        </div>
+        
+        <footer class="p-4 text-center text-xs text-gray-400 bg-gray-50 border-t">
+            Pico y Placa Pasto 2026 © Sistema Autónomo
+        </footer>
     </div>
 
     <script>
-        // Base de datos sincronizada con la fotografía "calendario pico y placa 2026 _3.jpg"
-        const dbCalendario = [
-            { fecha: "2026-05-03", dia: "domingo", placas: "No aplica", col: "v-ninguno" },
-            { fecha: "2026-05-04", dia: "lunes", placas: "8-9", col: "v-azul" },
-            { fecha: "2026-05-05", dia: "martes", placas: "0-1", col: "v-verde" },
-            { fecha: "2026-05-06", dia: "miércoles", placas: "2-3", col: "v-gris" },
-            { fecha: "2026-05-07", dia: "jueves", placas: "4-5", col: "v-rojo" },
-            { fecha: "2026-05-08", dia: "viernes", placas: "6-7", col: "v-amarillo" },
-            { fecha: "2026-05-09", dia: "sábado", placas: "No aplica", col: "v-ninguno" },
-            { fecha: "2026-05-10", dia: "domingo", placas: "No aplica", col: "v-ninguno" },
-            { fecha: "2026-05-11", dia: "lunes", placas: "0-1", col: "v-verde" },
-            { fecha: "2026-05-12", dia: "martes", placas: "2-3", col: "v-gris" },
-            { fecha: "2026-05-13", dia: "miércoles", placas: "4-5", col: "v-rojo" },
-            { fecha: "2026-05-14", dia: "jueves", placas: "6-7", col: "v-amarillo" },
-            { fecha: "2026-05-15", dia: "viernes", placas: "8-9", col: "v-azul" }
-        ];
+        // Configuración de visualización inicial
+        let maxDiasVisibles = 6; 
+        const totalDiasAGenerar = 30; // Genera un colchón de un mes continuo de datos
+        let dbCalendario = [];
+
+        // Función matemática que calcula el pico y placa sin usar base de datos estática
+        function obtenerReglaParaFecha(fechaObjeto) {
+            const diaSemana = fechaObjeto.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+            
+            // Fines de semana no aplica
+            if (diaSemana === 0 || diaSemana === 6) {
+                return { placas: "No aplica", col: "v-ninguno" };
+            }
+
+            // Mapeo basado en la rotación oficial del 2026 de Pasto
+            // Lunes: 0-1, Martes: 2-3, Miércoles: 4-5, Jueves: 6-7, Viernes: 8-9
+            switch (diaSemana) {
+                case 1: return { placas: "0-1", col: "v-verde" };
+                case 2: return { placas: "2-3", col: "v-gris" };
+                case 3: return { placas: "4-5", col: "v-rojo" };
+                case 4: return { placas: "6-7", col: "v-amarillo" };
+                case 5: return { placas: "8-9", col: "v-azul" };
+                default: return { placas: "No aplica", col: "v-ninguno" };
+            }
+        }
+
+        function generarCalendarioDinamico() {
+            dbCalendario = [];
+            const nombresDias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+            
+            // Empezamos desde hoy de forma estricta hora local
+            let fechaIterada = new Date();
+            
+            for (let i = 0; i < totalDiasAGenerar; i++) {
+                const copiaFecha = new Date(fechaIterada);
+                const hoyISO = copiaFecha.toLocaleDateString('en-CA'); // Formato YYYY-MM-DD
+                const diaNombre = nombresDias[copiaFecha.getDay()];
+                const regla = obtenerReglaParaFecha(copiaFecha);
+
+                dbCalendario.push({
+                    fecha: hoyISO,
+                    dia: diaNombre,
+                    placas: regla.placas,
+                    col: regla.col
+                });
+
+                // Avanzar un día en la iteración
+                fechaIterada.setDate(fechaIterada.getDate() + 1);
+            }
+        }
 
         function actualizarVista() {
+            generarCalendarioDinamico();
+
+            // Seteo del Header
             const ahora = new Date();
-            const hoyISO = ahora.toLocaleDateString('en-CA'); 
-            
             const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             document.getElementById('txt-hoy-header').innerText = "Hoy " + ahora.toLocaleDateString('es-CO', opciones);
 
-            const datosVigentes = dbCalendario.filter(item => item.fecha >= hoyISO);
-
-            if (datosVigentes.length === 0) return;
-
-            const hoyInfo = datosVigentes[0];
+            // Render del bloque "HOY"
+            const hoyInfo = dbCalendario[0];
             const secHoy = document.getElementById('seccion-hoy');
             const esLibre = hoyInfo.placas === "No aplica";
 
@@ -91,15 +125,29 @@
                 </div>
             `;
 
+            // Render de la lista de los siguientes días
+            renderizarListaDias();
+        }
+
+        function renderizarListaDias() {
             const lista = document.getElementById('lista-pyp');
             lista.innerHTML = "";
-            const diasSiguientes = datosVigentes.slice(1);
+            
+            // Saltamos el índice 0 (que es hoy)
+            const diasSiguientes = dbCalendario.slice(1);
 
             diasSiguientes.forEach((item, index) => {
                 const esManana = index === 0;
-                const esOculto = index > 5;
+                
+                // Elemento contenedor dinámico
                 const div = document.createElement('div');
-                div.className = `flex items-center justify-between py-4 ${esOculto ? 'hidden-days' : ''}`;
+                
+                // Si supera el límite de visibles configurado, se oculta mediante Tailwind (hidden)
+                if (index >= maxDiasVisibles) {
+                    div.className = "flex items-center justify-between py-4 hidden js-dia-oculto";
+                } else {
+                    div.className = "flex items-center justify-between py-4";
+                }
                 
                 div.innerHTML = `
                     <div class="flex flex-col">
@@ -110,7 +158,7 @@
                     </div>
                     <div>
                         ${item.placas === "No aplica" 
-                            ? `<span class="text-xs font-bold text-gray-300 font-black">Libre</span>`
+                            ? `<span class="text-xs font-bold text-gray-400 font-black">Libre</span>`
                             : `<span class="px-5 py-2 rounded-lg font-black shadow-md block text-center min-w-[75px] numero-placa-grande ${item.col}">${item.placas}</span>`
                         }
                     </div>
@@ -120,11 +168,19 @@
         }
 
         let extendido = false;
-        function mostrarMasDias() {
-            const ocultos = document.querySelectorAll('.hidden-days');
+        function alternarDias() {
+            const ocultos = document.querySelectorAll('.js-dia-oculto');
             const btnTexto = document.getElementById('btn-texto');
             extendido = !extendido;
-            ocultos.forEach(el => el.style.display = extendido ? 'flex' : 'none');
+
+            ocultos.forEach(el => {
+                if (extendido) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
             btnTexto.innerText = extendido ? "↑ Ver menos días" : "↓ Ver más días";
         }
 
@@ -132,7 +188,4 @@
     </script>
 </body>
 </html>
-
-
-
 
