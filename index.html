@@ -27,7 +27,7 @@
             <header class="p-6 border-b bg-white sticky top-0 z-10">
                 <h1 class="text-xl font-bold text-gray-900 leading-tight">Pico y placa <span class="text-blue-600 font-black italic text-2xl">particulares</span> en Pasto</h1>
                 <p id="txt-hoy-header" class="text-sm text-gray-500 font-bold mt-1 capitalize"></p>
-                <p class="text-[11px] text-gray-400 mt-2 italic">Sincronizado dinámicamente con festivos de Colombia 2026.</p>
+                <p class="text-[11px] text-gray-400 mt-2 italic">Sincronizado con el calendario de rotación fija oficial.</p>
             </header>
 
             <section class="p-4" id="seccion-hoy">
@@ -46,15 +46,14 @@
         </div>
         
         <footer class="p-4 text-center text-xs text-gray-400 bg-gray-50 border-t">
-            Pico y Placa Pasto 2026 © Calendario Inteligente
+            Pico y Placa Pasto 2026 © Calendario Fijo Automatizado
         </footer>
     </div>
 
     <script>
-        // 1. LISTA OFICIAL DE FESTIVOS EN COLOMBIA 2026 (Resto del año)
-        // Agrega o modifica aquí las fechas YYYY-MM-DD si es necesario
+        // 1. LISTA OFICIAL DE FESTIVOS EN COLOMBIA 2026
         const festivos2026 = [
-            "2026-05-18", // Lunes de la Ascensión (Tu próximo festivo)
+            "2026-05-18", // Lunes de la Ascensión
             "2026-06-08", // Corpus Christi
             "2026-06-15", // Sagrado Corazón
             "2026-06-29", // San Pedro y San Pablo
@@ -68,88 +67,63 @@
             "2026-12-25"  // Navidad
         ];
 
-        // 2. SECUENCIA RIGUROSA DE TURNOS
-        // Representa el orden cíclico infinito de las placas en Pasto
-        const secuenciaPlacas = [
-            { placas: "0-1", col: "v-verde" },
-            { placas: "2-3", col: "v-gris" },
-            { placas: "4-5", col: "v-rojo" },
-            { placas: "6-7", col: "v-amarillo" },
-            { placas: "8-9", col: "v-azul" }
-        ];
+        // 2. REGLA DE ASIGNACIÓN FIJA POR DÍA DE LA SEMANA (Modelo pyphoy)
+        // 1 = Lunes, 2 = Martes, 3 = Miércoles, 4 = Jueves, 5 = Viernes
+        const reglasDiasFijas = {
+            1: { placas: "2-3", col: "v-gris" },      // Lunes fijo
+            2: { placas: "4-5", col: "v-rojo" },      // Martes fijo
+            3: { placas: "6-7", col: "v-amarillo" },  // Miércoles fijo
+            4: { placas: "8-9", col: "v-azul" },      // Jueves fijo
+            5: { placas: "0-1", col: "v-verde" }      // Viernes fijo
+        };
 
         let dbCalendario = [];
         let maxDiasVisibles = 6;
-        const totalDiasAGenerar = 35; // Genera poco más de un mes
+        const totalDiasAGenerar = 30; 
 
-        // 3. GENERADOR ALGORÍTMICO CON CONCIENCIA DE FESTIVOS
-        function generarCalendarioConFestivos() {
+        // 3. GENERADOR DE CALENDARIO BASADO EN DÍAS DE LA SEMANA FIJOS
+        function generarCalendarioFijo() {
             dbCalendario = [];
             const nombresDias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
             
-            // Punto de partida de la secuencia: Sabemos de forma absoluta que el
-            // viernes 15 de mayo de 2026 la placa fue 8-9 (índice 4 de nuestra secuencia)
-            let fechaAncla = new Date("2026-05-15T00:00:00");
-            let indiceSecuencia = 4; // Corresponde a "8-9"
+            let fechaIterada = new Date();
+            fechaIterada.setHours(0,0,0,0); // Normalizar hora local
 
-            // Para poder calcular cualquier fecha hacia adelante, primero inicializamos 
-            // el estado de la secuencia justo antes del día de hoy.
-            let hoy = new Date();
-            hoy.setHours(0,0,0,0);
-
-            let iteradorFwd = new Date(fechaAncla);
-            
-            // Mapeo temporal para guardar las asignaciones diarias reales
-            let mapaAsignaciones = {};
-
-            // Calculamos secuencialmente día por día desde el ancla hasta cubrir los días deseados
-            let fechaLimite = new Date(hoy);
-            fechaLimite.setDate(fechaLimite.getDate() + totalDiasAGenerar);
-
-            while (iteradorFwd <= fechaLimite) {
-                // Avanzamos al día siguiente a calcular
-                iteradorFwd.setDate(iteradorFwd.getDate() + 1);
-                
-                const cadenaISO = iteradorFwd.toLocaleDateString('en-CA');
-                const numeroDiaSemana = iteradorFwd.getDay();
+            for (let i = 0; i < totalDiasAGenerar; i++) {
+                const cadenaISO = fechaIterada.toLocaleDateString('en-CA');
+                const numeroDiaSemana = fechaIterada.getDay(); // 0 a 6
                 const esFestivo = festivos2026.includes(cadenaISO);
 
-                // Si es fin de semana o festivo, NO aplica restricción y NO se avanza la secuencia
-                if (numeroDiaSemana === 0 || numeroDiaSemana === 6 || esFestivo) {
-                    mapaAsignaciones[cadenaISO] = { placas: "No aplica", col: "v-ninguno" };
-                } else {
-                    // Es día hábil: se consume el siguiente turno de la secuencia
-                    indiceSecuencia = (indiceSecuencia + 1) % secuenciaPlacas.length;
-                    mapaAsignaciones[cadenaISO] = secuenciaPlacas[indiceSecuencia];
-                }
-            }
+                let infoPlaca = { placas: "No aplica", col: "v-ninguno" };
 
-            // Ahora estructuramos el array dbCalendario partiendo estrictamente desde HOY
-            let registroDia = new Date(hoy);
-            for (let i = 0; i < totalDiasAGenerar; i++) {
-                const cadenaISO = registroDia.toLocaleDateString('en-CA');
-                const datosDia = mapaAsignaciones[cadenaISO] || { placas: "No aplica", col: "v-ninguno" };
+                // Si no es fin de semana y TAMPOCO es festivo, toma la regla fija del día
+                if (numeroDiaSemana !== 0 && numeroDiaSemana !== 6 && !esFestivo) {
+                    if (reglasDiasFijas[numeroDiaSemana]) {
+                        infoPlaca = reglasDiasFijas[numeroDiaSemana];
+                    }
+                }
 
                 dbCalendario.push({
                     fecha: cadenaISO,
-                    dia: nombresDias[registroDia.getDay()],
-                    placas: datosDia.placas,
-                    col: datosDia.col
+                    dia: nombresDias[numeroDiaSemana],
+                    placas: infoPlaca.placas,
+                    col: infoPlaca.col
                 });
 
-                registroDia.setDate(registroDia.getDate() + 1);
+                // Avanzar un día
+                fechaIterada.setDate(fechaIterada.getDate() + 1);
             }
         }
 
         function actualizarVista() {
-            generarCalendarioConFestivos();
+            generarCalendarioFijo();
 
-            // Seteo del Header
+            // Configurar Header con fecha local de hoy
             const ahora = new Date();
             const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             document.getElementById('txt-hoy-header').innerText = "Hoy " + ahora.toLocaleDateString('es-CO', opciones);
 
-            // Render del bloque "HOY"
+            // Render de la tarjeta principal "HOY"
             const hoyInfo = dbCalendario[0];
             const secHoy = document.getElementById('seccion-hoy');
             const esLibre = hoyInfo.placas === "No aplica";
@@ -167,7 +141,7 @@
                 </div>
             `;
 
-            // Render de la lista de los siguientes días
+            // Render del listado inferior de días siguientes
             renderizarListaDias();
         }
 
@@ -227,5 +201,6 @@
     </script>
 </body>
 </html>
+
 
 
