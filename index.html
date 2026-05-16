@@ -27,7 +27,7 @@
             <header class="p-6 border-b bg-white sticky top-0 z-10">
                 <h1 class="text-xl font-bold text-gray-900 leading-tight">Pico y placa <span class="text-blue-600 font-black italic text-2xl">particulares</span> en Pasto</h1>
                 <p id="txt-hoy-header" class="text-sm text-gray-500 font-bold mt-1 capitalize"></p>
-                <p class="text-[11px] text-gray-400 mt-2 italic">Sincronizado con el calendario de rotación fija oficial.</p>
+                <p class="text-[11px] text-gray-400 mt-2 italic">Sincronizado dinámicamente con el ciclo rotativo oficial.</p>
             </header>
 
             <section class="p-4" id="seccion-hoy">
@@ -46,12 +46,12 @@
         </div>
         
         <footer class="p-4 text-center text-xs text-gray-400 bg-gray-50 border-t">
-            Pico y Placa Pasto 2026 © Calendario Fijo Automatizado
+            Pico y Placa Pasto 2026 © Sistema Rotativo Autónomo
         </footer>
     </div>
 
     <script>
-        // 1. LISTA OFICIAL DE FESTIVOS EN COLOMBIA 2026
+        // 1. LISTA DE FESTIVOS OFICIALES EN COLOMBIA 2026
         const festivos2026 = [
             "2026-05-18", // Lunes de la Ascensión
             "2026-06-08", // Corpus Christi
@@ -67,40 +67,81 @@
             "2026-12-25"  // Navidad
         ];
 
-        // 2. REGLA DE ASIGNACIÓN FIJA POR DÍA DE LA SEMANA (Modelo pyphoy)
-        // 1 = Lunes, 2 = Martes, 3 = Miércoles, 4 = Jueves, 5 = Viernes
-        const reglasDiasFijas = {
-            1: { placas: "2-3", col: "v-gris" },      // Lunes fijo
-            2: { placas: "4-5", col: "v-rojo" },      // Martes fijo
-            3: { placas: "6-7", col: "v-amarillo" },  // Miércoles fijo
-            4: { placas: "8-9", col: "v-azul" },      // Jueves fijo
-            5: { placas: "0-1", col: "v-verde" }      // Viernes fijo
-        };
+        // 2. SECUENCIA ROTATIVA INTEGRAL
+        const secuenciaPlacas = [
+            { placas: "0-1", col: "v-verde" },
+            { placas: "2-3", col: "v-gris" },
+            { placas: "4-5", col: "v-rojo" },
+            { placas: "6-7", col: "v-amarillo" },
+            { placas: "8-9", col: "v-azul" }
+        ];
 
         let dbCalendario = [];
         let maxDiasVisibles = 6;
-        const totalDiasAGenerar = 30; 
+        const totalDiasAGenerar = 30;
 
-        // 3. GENERADOR DE CALENDARIO BASADO EN DÍAS DE LA SEMANA FIJOS
-        function generarCalendarioFijo() {
+        // 3. ENCONTRAR LA REGLA MATEMÁTICA MEDIANTE ANCLA CONSTANTE
+        function obtenerReglaParaFecha(fechaObjeto) {
+            // Ancla oficial confirmada: Viernes 12 de Junio de 2026 es Placa 6-7 (Índice 3 de nuestra secuencia)
+            const fechaAncla = new Date(2026, 5, 12); // Nota: En JS los meses van de 0 a 11 (5 = Junio)
+            
+            // Clonamos y normalizamos horas a medianoche para evitar desfases
+            const d1 = new Date(fechaAncla.getFullYear(), fechaAncla.getMonth(), fechaAncla.getDate());
+            const d2 = new Date(fechaObjeto.getFullYear(), fechaObjeto.getMonth(), fechaObjeto.getDate());
+            
+            // Calcular la diferencia absoluta en días calendario
+            const diferenciaTiempo = d2.getTime() - d1.getTime();
+            let diasDeDiferencia = Math.round(diferenciaTiempo / (1000 * 60 * 60 * 24));
+
+            // Índice base correspondiente al Viernes 12 de Junio (6-7 => Índice 3)
+            let indiceAncla = 3; 
+
+            // Algoritmo de avance o retroceso contabilizando únicamente los días hábiles (Lunes a Viernes)
+            let diasHabilesAsignados = 0;
+            let paso = diasDeDiferencia >= 0 ? 1 : -1;
+            let iterador = new Date(d1);
+
+            while (diasDeDiferencia !== 0) {
+                iterador.setDate(iterador.getDate() + paso);
+                const diaSemana = iterador.getDay();
+                
+                // Si el día de la secuencia es un día hábil (L-V), sumamos o restamos un paso en la rotación de placas
+                if (diaSemana !== 0 && diaSemana !== 6) {
+                    diasHabilesAsignados += paso;
+                }
+                diasDeDiferencia -= paso;
+            }
+
+            // Calcular el índice final en la secuencia de 5 elementos aplicando módulo circular correcto
+            let indiceFinal = (indiceAncla + diasHabilesAsignados) % secuenciaPlacas.length;
+            if (indiceFinal < 0) {
+                indiceFinal += secuenciaPlacas.length;
+            }
+
+            return secuenciaPlacas[indiceFinal];
+        }
+
+        // 4. CONSTRUCCIÓN DE LA VISTA COMPLETA
+        function generarCalendarioRotativo() {
             dbCalendario = [];
             const nombresDias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
             
             let fechaIterada = new Date();
-            fechaIterada.setHours(0,0,0,0); // Normalizar hora local
+            fechaIterada.setHours(0,0,0,0);
 
             for (let i = 0; i < totalDiasAGenerar; i++) {
                 const cadenaISO = fechaIterada.toLocaleDateString('en-CA');
-                const numeroDiaSemana = fechaIterada.getDay(); // 0 a 6
+                const numeroDiaSemana = fechaIterada.getDay();
                 const esFestivo = festivos2026.includes(cadenaISO);
 
+                // Se calcula qué placa corresponde según el orden natural del ciclo de la ciudad
+                const reglaAsignada = obtenerReglaParaFecha(fechaIterada);
+                
                 let infoPlaca = { placas: "No aplica", col: "v-ninguno" };
 
-                // Si no es fin de semana y TAMPOCO es festivo, toma la regla fija del día
+                // La restricción se aplica en las calles SÓLO si es día hábil y NO es festivo
                 if (numeroDiaSemana !== 0 && numeroDiaSemana !== 6 && !esFestivo) {
-                    if (reglasDiasFijas[numeroDiaSemana]) {
-                        infoPlaca = reglasDiasFijas[numeroDiaSemana];
-                    }
+                    infoPlaca = reglaAsignada;
                 }
 
                 dbCalendario.push({
@@ -110,20 +151,17 @@
                     col: infoPlaca.col
                 });
 
-                // Avanzar un día
                 fechaIterada.setDate(fechaIterada.getDate() + 1);
             }
         }
 
         function actualizarVista() {
-            generarCalendarioFijo();
+            generarCalendarioRotativo();
 
-            // Configurar Header con fecha local de hoy
             const ahora = new Date();
             const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             document.getElementById('txt-hoy-header').innerText = "Hoy " + ahora.toLocaleDateString('es-CO', opciones);
 
-            // Render de la tarjeta principal "HOY"
             const hoyInfo = dbCalendario[0];
             const secHoy = document.getElementById('seccion-hoy');
             const esLibre = hoyInfo.placas === "No aplica";
@@ -141,7 +179,6 @@
                 </div>
             `;
 
-            // Render del listado inferior de días siguientes
             renderizarListaDias();
         }
 
