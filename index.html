@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pico y Placa Pasto 2026 - En Vivo</title>
+    <title>Pico y Placa Pasto 2026 - Particular</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Paleta de colores de alto contraste */
+        /* Paleta de colores de alto contraste optimizada */
         .v-verde { background-color: #00813d; color: white; }
         .v-gris { background-color: #d1d5db; color: #111827; }
         .v-rojo { background-color: #c8102e; color: white; }
@@ -20,83 +20,106 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800">
+<body class="bg-gray-50 font-sans text-gray-800 antialiased">
 
-    <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl flex flex-col justify-between">
+    <div class="max-w-md mx-auto min-h-screen bg-white shadow-xl flex flex-col justify-between border-x border-gray-100">
         <div>
-            <header class="p-6 border-b bg-white sticky top-0 z-10">
+            <!-- Header Principal -->
+            <header class="p-6 border-b bg-white sticky top-0 z-20 shadow-sm">
                 <h1 class="text-xl font-bold text-gray-900 leading-tight">Pico y placa <span class="text-blue-600 font-black italic text-2xl">particulares</span> en Pasto</h1>
-                <p id="txt-hoy-header" class="text-sm text-gray-500 font-bold mt-1 capitalize"></p>
-                <p class="text-[11px] text-gray-400 mt-2 italic">Sincronizado dinámicamente con el ciclo rotativo oficial.</p>
+                <p id="txt-hoy-header" class="text-xs text-gray-500 font-bold mt-1 capitalize"></p>
+                <p class="text-[11px] text-gray-400 mt-1 italic">Sincronizado con el modelo matemático continuo 2026.</p>
             </header>
 
-            <section class="p-4" id="seccion-hoy">
-                <!-- Renderizado dinámico del día actual -->
+            <!-- Sección: ¿Cuándo tengo pico y placa? -->
+            <section class="p-5 bg-gradient-to-b from-gray-50 to-white border-b border-gray-100">
+                <h3 class="text-sm font-black text-gray-700 uppercase tracking-wider mb-3 text-center">¿Cuándo tengo pico y placa?</h3>
+                <p class="text-xs text-gray-400 text-center mb-4">Selecciona el último dígito de tu placa para filtrar el calendario:</p>
+                
+                <!-- Teclado de Dígitos -->
+                <div class="grid grid-cols-5 gap-2 max-w-xs mx-auto" id="contenedor-digitos">
+                    <button onclick="filtrarPorPlaca('0', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">0</button>
+                    <button onclick="filtrarPorPlaca('1', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">1</button>
+                    <button onclick="filtrarPorPlaca('2', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">2</button>
+                    <button onclick="filtrarPorPlaca('3', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">3</button>
+                    <button onclick="filtrarPorPlaca('4', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">4</button>
+                    <button onclick="filtrarPorPlaca('5', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">5</button>
+                    <button onclick="filtrarPorPlaca('6', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">6</button>
+                    <button onclick="filtrarPorPlaca('7', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">7</button>
+                    <button onclick="filtrarPorPlaca('8', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">8</button>
+                    <button onclick="filtrarPorPlaca('9', this)" class="btn-placa py-2.5 bg-white border border-gray-200 rounded-xl font-black text-gray-700 hover:border-blue-500 hover:bg-blue-50 transition-all shadow-sm">9</button>
+                </div>
+                
+                <!-- Botón para limpiar filtro (inicialmente oculto) -->
+                <div class="text-center mt-3 hidden" id="bloque-limpiar">
+                    <button onclick="limpiarFiltro()" class="text-xs text-red-500 font-bold hover:underline">✕ Quitar filtro de placa</button>
+                </div>
             </section>
 
-            <section class="px-6 pb-6">
+            <!-- Bloque de Estado Actual (Hoy) -->
+            <section class="p-4" id="seccion-hoy">
+                <!-- Renderizado dinámico -->
+            </section>
+
+            <!-- Listado Completo de Días (Próximos 31 días según parámetro solicitado) -->
+            <section class="px-6 pb-4">
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Próximos 31 días</h4>
                 <div id="lista-pyp" class="divide-y divide-gray-100">
-                    <!-- Listado dinámico de los siguientes días -->
+                    <!-- Filas dinámicas -->
                 </div>
 
-                <button id="btn-ver-mas" onclick="alternarDias()" class="w-full mt-4 py-4 text-blue-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors rounded-xl border-2 border-dashed border-blue-100">
+                <button id="btn-ver-mas" onclick="alternarDias()" class="w-full mt-4 py-3.5 text-blue-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors rounded-xl border-2 border-dashed border-blue-100">
                     <span id="btn-texto">↓ Ver más días</span>
                 </button>
             </section>
         </div>
         
-        <footer class="p-4 text-center text-xs text-gray-400 bg-gray-50 border-t">
-            Pico y Placa Pasto 2026 © Sistema Rotativo Autónomo
-        </footer>
+        <!-- Feedback & Footer Estilo pyphoy -->
+        <div>
+            <section class="bg-gray-50 border-t border-gray-100 p-5 text-center text-xs">
+                <p class="font-bold text-gray-600 mb-1">¿Algo no está bien?</p>
+                <a href="mailto:soporte@tuweb.com?subject=Reporte%20Pico%20y%20Placa%20Pasto" class="text-blue-600 font-black hover:underline inline-flex items-center gap-1">
+                    Ayúdenos a mejorar esta página 📝
+                </a>
+            </section>
+
+            <footer class="p-4 text-center text-[10px] text-gray-400 bg-gray-900 font-medium">
+                Pico y Placa Pasto 2026 — Información de utilidad pública no oficial.
+            </footer>
+        </div>
     </div>
 
     <script>
-        // 1. LISTA DE FESTIVOS OFICIALES EN COLOMBIA 2026
+        // Base de Datos Estructural de Festivos Colombia 2026
         const festivos2026 = [
-            "2026-05-18", // Lunes de la Ascensión
-            "2026-06-08", // Corpus Christi
-            "2026-06-15", // Sagrado Corazón
-            "2026-06-29", // San Pedro y San Pablo
-            "2026-07-20", // Día de la Independencia
-            "2026-08-07", // Batalla de Boyacá
-            "2026-08-17", // Asunción de la Virgen
-            "2026-10-12", // Día de la Raza
-            "2026-11-02", // Todos los Santos
-            "2026-11-16", // Independencia de Cartagena
-            "2026-12-08", // Inmaculada Concepción
-            "2026-12-25"  // Navidad
+            "2026-05-18", "2026-06-08", "2026-06-15", "2026-06-29",
+            "2026-07-20", "2026-08-07", "2026-08-17", "2026-10-12",
+            "2026-11-02", "2026-11-16", "2026-12-08", "2026-12-25"
         ];
 
-        // 2. SECUENCIA ROTATIVA INTEGRAL
         const secuenciaPlacas = [
-            { placas: "0-1", col: "v-verde" },
-            { placas: "2-3", col: "v-gris" },
-            { placas: "4-5", col: "v-rojo" },
-            { placas: "6-7", col: "v-amarillo" },
-            { placas: "8-9", col: "v-azul" }
+            { placas: "0-1", digitos: ["0", "1"], col: "v-verde" },
+            { placas: "2-3", digitos: ["2", "3"], col: "v-gris" },
+            { placas: "4-5", digitos: ["4", "5"], col: "v-rojo" },
+            { placas: "6-7", digitos: ["6", "7"], col: "v-amarillo" },
+            { placas: "8-9", digitos: ["8", "9"], col: "v-azul" }
         ];
 
         let dbCalendario = [];
         let maxDiasVisibles = 6;
-        const totalDiasAGenerar = 30;
+        const totalDiasAGenerar = 31; // Forzado exacto a 31 días según la URL muestra
+        let placaFiltradaActual = null;
 
-        // 3. ENCONTRAR LA REGLA MATEMÁTICA MEDIANTE ANCLA CONSTANTE
+        // Motor Matemático Basado en Ancla Invariable (Viernes 12 de Junio de 2026 = 6-7)
         function obtenerReglaParaFecha(fechaObjeto) {
-            // Ancla oficial confirmada: Viernes 12 de Junio de 2026 es Placa 6-7 (Índice 3 de nuestra secuencia)
-            const fechaAncla = new Date(2026, 5, 12); // Nota: En JS los meses van de 0 a 11 (5 = Junio)
-            
-            // Clonamos y normalizamos horas a medianoche para evitar desfases
+            const fechaAncla = new Date(2026, 5, 12);
             const d1 = new Date(fechaAncla.getFullYear(), fechaAncla.getMonth(), fechaAncla.getDate());
             const d2 = new Date(fechaObjeto.getFullYear(), fechaObjeto.getMonth(), fechaObjeto.getDate());
             
-            // Calcular la diferencia absoluta en días calendario
             const diferenciaTiempo = d2.getTime() - d1.getTime();
             let diasDeDiferencia = Math.round(diferenciaTiempo / (1000 * 60 * 60 * 24));
 
-            // Índice base correspondiente al Viernes 12 de Junio (6-7 => Índice 3)
-            let indiceAncla = 3; 
-
-            // Algoritmo de avance o retroceso contabilizando únicamente los días hábiles (Lunes a Viernes)
+            let indiceAncla = 3; // Índice de "6-7"
             let diasHabilesAsignados = 0;
             let paso = diasDeDiferencia >= 0 ? 1 : -1;
             let iterador = new Date(d1);
@@ -104,25 +127,19 @@
             while (diasDeDiferencia !== 0) {
                 iterador.setDate(iterador.getDate() + paso);
                 const diaSemana = iterador.getDay();
-                
-                // Si el día de la secuencia es un día hábil (L-V), sumamos o restamos un paso en la rotación de placas
                 if (diaSemana !== 0 && diaSemana !== 6) {
                     diasHabilesAsignados += paso;
                 }
                 diasDeDiferencia -= paso;
             }
 
-            // Calcular el índice final en la secuencia de 5 elementos aplicando módulo circular correcto
             let indiceFinal = (indiceAncla + diasHabilesAsignados) % secuenciaPlacas.length;
-            if (indiceFinal < 0) {
-                indiceFinal += secuenciaPlacas.length;
-            }
+            if (indiceFinal < 0) indiceFinal += secuenciaPlacas.length;
 
             return secuenciaPlacas[indiceFinal];
         }
 
-        // 4. CONSTRUCCIÓN DE LA VISTA COMPLETA
-        function generarCalendarioRotativo() {
+        function generarCalendarioCompleto() {
             dbCalendario = [];
             const nombresDias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
             
@@ -134,12 +151,9 @@
                 const numeroDiaSemana = fechaIterada.getDay();
                 const esFestivo = festivos2026.includes(cadenaISO);
 
-                // Se calcula qué placa corresponde según el orden natural del ciclo de la ciudad
                 const reglaAsignada = obtenerReglaParaFecha(fechaIterada);
-                
-                let infoPlaca = { placas: "No aplica", col: "v-ninguno" };
+                let infoPlaca = { placas: "No aplica", digitos: [], col: "v-ninguno" };
 
-                // La restricción se aplica en las calles SÓLO si es día hábil y NO es festivo
                 if (numeroDiaSemana !== 0 && numeroDiaSemana !== 6 && !esFestivo) {
                     infoPlaca = reglaAsignada;
                 }
@@ -148,6 +162,7 @@
                     fecha: cadenaISO,
                     dia: nombresDias[numeroDiaSemana],
                     placas: infoPlaca.placas,
+                    digitos: infoPlaca.digitos,
                     col: infoPlaca.col
                 });
 
@@ -156,7 +171,7 @@
         }
 
         function actualizarVista() {
-            generarCalendarioRotativo();
+            generarCalendarioCompleto();
 
             const ahora = new Date();
             const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
@@ -168,12 +183,12 @@
             const esFestivoHoy = festivos2026.includes(hoyInfo.fecha);
 
             secHoy.innerHTML = `
-                <div class="rounded-3xl p-6 flex flex-col items-center justify-center text-center ${esLibre ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'} border">
-                    <div class="text-5xl mb-2">${esLibre ? '🚗' : '🚫'}</div>
-                    <p class="text-gray-500 font-bold text-xs uppercase tracking-widest">Hoy ${hoyInfo.dia} ${esFestivoHoy ? '(Festivo)' : ''}</p>
-                    <p class="text-gray-400 text-[10px] mb-2">${hoyInfo.fecha}</p>
-                    <h2 class="text-2xl font-black ${esLibre ? 'text-emerald-700' : 'text-red-700'}">${esLibre ? 'NO HAY RESTRICCIÓN' : 'RESTRICCIÓN ACTIVA'}</h2>
-                    <span class="mt-3 px-8 py-2 bg-white border rounded-full font-black shadow-sm numero-placa-grande ${esLibre ? 'text-emerald-700 border-emerald-200' : 'text-red-700 border-red-200'}">
+                <div id="tarjeta-hoy" class="rounded-3xl p-5 flex flex-col items-center justify-center text-center ${esLibre ? 'bg-emerald-50 border-emerald-100 text-emerald-900' : 'bg-red-50 border-red-100 text-red-900'} border transition-all duration-300">
+                    <div class="text-4xl mb-1">${esLibre ? '🚗' : '🚫'}</div>
+                    <p class="text-gray-500 font-bold text-[11px] uppercase tracking-widest">Hoy ${hoyInfo.dia} ${esFestivoHoy ? '(Festivo)' : ''}</p>
+                    <p class="text-gray-400 text-[10px] mb-1">${hoyInfo.fecha}</p>
+                    <h2 id="titulo-hoy-restriccion" class="text-xl font-black">${esLibre ? 'NO HAY RESTRICCIÓN' : 'RESTRICCIÓN ACTIVA'}</h2>
+                    <span id="placa-badge-hoy" class="mt-2 px-6 py-1.5 bg-white border rounded-full font-black shadow-sm text-sm ${esLibre ? 'text-emerald-700 border-emerald-200' : 'text-red-700 border-red-200'}">
                         ${esLibre ? 'No aplica' : 'Placas ' + hoyInfo.placas}
                     </span>
                 </div>
@@ -193,11 +208,11 @@
                 const div = document.createElement('div');
                 const esFestivoDia = festivos2026.includes(item.fecha);
                 
-                if (index >= maxDiasVisibles) {
-                    div.className = "flex items-center justify-between py-4 hidden js-dia-oculto";
-                } else {
-                    div.className = "flex items-center justify-between py-4";
-                }
+                // Determinamos la clase de visibilidad base (limite inicial)
+                let claseVisibilidad = index >= maxDiasVisibles ? 'hidden js-dia-oculto' : '';
+                
+                div.className = `flex items-center justify-between py-3.5 transition-all duration-200 data-fila-calendario ${claseVisibilidad}`;
+                div.setAttribute('data-digitos', JSON.stringify(item.digitos));
                 
                 div.innerHTML = `
                     <div class="flex flex-col">
@@ -208,36 +223,139 @@
                     </div>
                     <div>
                         ${item.placas === "No aplica" 
-                            ? `<span class="text-xs font-bold text-gray-400 font-black">Libre</span>`
-                            : `<span class="px-5 py-2 rounded-lg font-black shadow-md block text-center min-w-[75px] numero-placa-grande ${item.col}">${item.placas}</span>`
+                            ? `<span class="text-xs font-bold text-gray-300 font-black tracking-wide">Libre</span>`
+                            : `<span class="px-4 py-1.5 rounded-xl font-black shadow-sm block text-center min-w-[70px] text-sm ${item.col}">${item.placas}</span>`
                         }
                     </div>
                 `;
                 lista.appendChild(div);
             });
+
+            // Si hay un filtro activo al reconstruir, lo reaplicamos visualmente
+            if (placaFiltradaActual !== null) {
+                ejecutarFiltradoVisual(placaFiltradaActual);
+            }
         }
 
+        // LÓGICA INTERACTIVA: ¿Cuándo tengo pico y placa?
+        function filtrarPorPlaca(digito, elementoBoton) {
+            // Si hace clic en el que ya está activo, limpiamos el filtro
+            if (placaFiltradaActual === digito) {
+                limpiarFiltro();
+                return;
+            }
+
+            placaFiltradaActual = digito;
+
+            // Cambiar estados visuales de los botones de dígitos
+            document.querySelectorAll('.btn-placa').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'scale-105');
+                btn.classList.add('bg-white', 'text-gray-700', 'border-gray-200');
+            });
+            elementoBoton.classList.remove('bg-white', 'text-gray-700', 'border-gray-200');
+            elementoBoton.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'scale-105');
+
+            document.getElementById('bloque-limpiar').classList.remove('hidden');
+
+            ejecutarFiltradoVisual(digito);
+        }
+
+        function ejecutarFiltradoVisual(digito) {
+            // 1. Modificar comportamiento de la tarjeta de HOY
+            const hoyInfo = dbCalendario[0];
+            const tarjetaHoy = document.getElementById('tarjeta-hoy');
+            
+            if (hoyInfo.digitos.includes(digito)) {
+                tarjetaHoy.style.opacity = "1";
+                tarjetaHoy.style.transform = "scale(1.02)";
+                tarjetaHoy.classList.add('ring-4', 'ring-blue-500/20');
+            } else {
+                tarjetaHoy.style.opacity = "0.4";
+                tarjetaHoy.style.transform = "scale(1)";
+                tarjetaHoy.classList.remove('ring-4', 'ring-blue-500/20');
+            }
+
+            // 2. Modificar las filas del listado inferior
+            document.querySelectorAll('.data-fila-calendario').forEach(fila => {
+                const digitosFila = JSON.parse(fila.getAttribute('data-digitos') || "[]");
+                
+                if (digitosFila.includes(digito)) {
+                    fila.classList.remove('opacity-20', 'bg-white');
+                    fila.classList.add('bg-blue-50/50', 'font-bold', 'px-2', 'rounded-lg');
+                    // Forzar que los días con restricción para esa placa se vean aunque estuvieran ocultos
+                    fila.classList.remove('hidden'); 
+                } else {
+                    fila.classList.remove('bg-blue-50/50', 'px-2', 'rounded-lg');
+                    fila.classList.add('opacity-20');
+                    
+                    // Si el usuario no ha extendido el botón "Ver más", mantenemos ocultos los días lejanos
+                    if (!extendido && fila.classList.contains('js-dia-oculto')) {
+                        fila.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        function limpiarFiltro() {
+            placaFiltradaActual = null;
+            
+            // Restablecer estilos de botones
+            document.querySelectorAll('.btn-placa').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'scale-105');
+                btn.classList.add('bg-white', 'text-gray-700', 'border-gray-200');
+            });
+
+            document.getElementById('bloque-limpiar').classList.add('hidden');
+
+            // Restablecer la opacidad de la tarjeta principal
+            const tarjetaHoy = document.getElementById('tarjeta-hoy');
+            tarjetaHoy.style.opacity = "1";
+            tarjetaHoy.style.transform = "scale(1)";
+            tarjetaHoy.classList.remove('ring-4', 'ring-blue-500/20');
+
+            // Restablecer el listado completo
+            document.querySelectorAll('.data-fila-calendario').forEach((fila, index) => {
+                fila.classList.remove('opacity-20', 'bg-blue-50/50', 'px-2', 'rounded-lg');
+                
+                // Respetar la paginación del botón "Ver más"
+                if (!extendido && index >= maxDiasVisibles) {
+                    fila.classList.add('hidden');
+                }
+            });
+        }
+
+        // Lógica de control para la expansión de días (Ver más)
         let extendido = false;
         function alternarDias() {
-            const ocultos = document.querySelectorAll('.js-dia-oculto');
             const btnTexto = document.getElementById('btn-texto');
             extendido = !extendido;
 
-            ocultos.forEach(el => {
+            // Volvemos a renderizar o ajustar clases cuidando el estado del filtro de placa
+            document.querySelectorAll('.js-dia-oculto').forEach(el => {
                 if (extendido) {
                     el.classList.remove('hidden');
                 } else {
-                    el.classList.add('hidden');
+                    // Si está filtrado y corresponde al dígito seleccionado, NO lo ocultamos al contraer
+                    const digitosFila = JSON.parse(el.getAttribute('data-digitos') || "[]");
+                    if (placaFiltradaActual && digitosFila.includes(placaFiltradaActual)) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
                 }
             });
 
             btnTexto.innerText = extendido ? "↑ Ver menos días" : "↓ Ver más días";
+            
+            // Re-ejecutar el refresco visual si hay placa seleccionada
+            if (placaFiltradaActual) {
+                ejecutarFiltradoVisual(placaFiltradaActual);
+            }
         }
 
         window.onload = actualizarVista;
     </script>
 </body>
 </html>
-
 
 
