@@ -3,38 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pico y Placa Pasto 2026</title>
-    <!-- Tailwind CSS para un diseño limpio y moderno -->
+    <title>Pico y Placa Pasto Hoy</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons para los íconos de la interfaz -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+<body class="bg-[#f8fafc] text-slate-800 font-sans antialiased">
 
-    <!-- NAV BAR -->
-    <nav class="bg-indigo-700 text-white shadow-md">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i data-lucide="car" class="w-6 h-6"></i>
-                <span class="font-bold text-xl tracking-tight">Pico y Placa Pasto 2026</span>
+    <!-- ENCABEZADO ESTILO PYPHOY -->
+    <header class="bg-white border-b border-slate-100 sticky top-0 z-50">
+        <div class="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl">
+                    <i data-lucide="car" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg text-slate-950 tracking-tight">Pico y Placa Pasto</h1>
+                    <p class="text-xs text-slate-500 font-medium">Particulares, Motos y Taxis</p>
+                </div>
             </div>
-            <span class="bg-indigo-600 text-xs px-3 py-1 rounded-full font-medium border border-indigo-500">Particular, Moto y Taxi</span>
+            <span id="badge-año" class="bg-slate-100 text-slate-600 text-xs px-3 py-1.5 rounded-full font-bold">Año 2026</span>
         </div>
-    </nav>
+    </header>
 
-    <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <main class="max-w-2xl mx-auto px-4 py-6 space-y-6">
         
-        <!-- SECCIÓN: CONSULTA POR DÍGITO (Estilo PyPHoy) -->
-        <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
-            <h2 class="text-xl font-bold text-gray-900 mb-2">¿Cuándo tengo pico y placa?</h2>
-            <p class="text-sm text-gray-500 mb-4">Selecciona el último dígito de tu placa</p>
+        <!-- ESTADO DEL DÍA DE HOY -->
+        <section id="estado-hoy" class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+            <!-- Se llena dinámicamente con JS basado en la fecha de hoy -->
+        </section>
+
+        <!-- SECCIÓN: INTERACTIVIDAD DE DÍGITOS (¿Cuándo tengo pico y placa?) -->
+        <section class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm text-center">
+            <h2 class="text-base font-bold text-slate-900 mb-1">¿Cuándo tengo pico y placa?</h2>
+            <p class="text-xs text-slate-400 mb-4 font-medium">Selecciona el último dígito de tu placa</p>
             
-            <div class="flex flex-wrap justify-center gap-2 max-w-xl mx-auto mb-6">
+            <div class="flex flex-wrap justify-center gap-1.5 max-w-md mx-auto mb-4">
                 <!-- Botones del 0 al 9 -->
                 <script>
                     for (let i = 0; i <= 9; i++) {
                         document.write(`
-                            <button onclick="buscarPorPlaca(${i})" class="w-11 h-11 bg-gray-100 hover:bg-indigo-600 hover:text-white rounded-xl font-bold text-lg transition-all border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            <button onclick="buscarPorPlaca(${i})" class="w-10 h-10 bg-slate-50 hover:bg-indigo-600 hover:text-white rounded-xl font-bold text-base transition-all border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                                 ${i}
                             </button>
                         `);
@@ -42,59 +52,52 @@
                 </script>
             </div>
             
-            <!-- Resultado de la consulta de placa -->
-            <div id="resultado-busqueda" class="hidden max-w-md mx-auto p-4 bg-indigo-50 rounded-xl border border-indigo-100 text-left transition-all">
-                <!-- Se llena dinámicamente con JS -->
-            </div>
+            <!-- Resultado de la búsqueda -->
+            <div id="resultado-busqueda" class="hidden text-left p-4 bg-slate-50 border border-slate-200/60 rounded-xl transition-all"></div>
         </section>
 
-        <!-- SECCIÓN: CRONOGRAMA DE DÍAS (Calendario Dinámico) -->
-        <section class="space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <i data-lucide="calendar" class="text-indigo-600 w-5 h-5"></i> Calendario de Restricciones
-                </h2>
-                <span class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-md font-semibold">Año 2026</span>
-            </div>
+        <!-- SECCIÓN: CRONOGRAMA PROGRESIVO -->
+        <section class="space-y-3">
+            <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider px-1">Próximos Días</h2>
 
-            <!-- Contenedor de las tarjetas de los días -->
-            <div id="contenedor-calendario" class="space-y-3">
-                <!-- Se genera dinámicamente con JS -->
+            <!-- Contenedor del calendario dinámico -->
+            <div id="contenedor-calendario" class="space-y-2.5">
+                <!-- Tarjetas dinámicas generadas con JS -->
             </div>
 
             <!-- Botón Ver Más Días -->
-            <div class="text-center pt-4">
-                <button onclick="cargarMasDias()" class="inline-flex items-center gap-2 bg-white hover:bg-gray-50 text-indigo-600 font-semibold px-6 py-3 rounded-xl border border-gray-200 shadow-sm transition-all text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    <i data-lucide="chevron-down" class="w-4 h-4"></i> Ver más días
+            <div class="text-center pt-2">
+                <button onclick="cargarMasDias()" class="w-full inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-indigo-600 font-bold py-3 px-4 rounded-xl border border-slate-200 shadow-sm transition-all text-sm focus:outline-none">
+                    <i data-lucide="chevrons-down" class="w-4 h-4"></i> ↓ Ver más días 
                 </button>
             </div>
         </section>
 
-        <!-- SECCIÓN: ALERTA PICO Y PLACA (Información fija del Decreto) -->
-        <section class="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-start gap-4">
-            <div class="p-3 bg-amber-100 text-amber-800 rounded-xl">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        <!-- ALERTA PICO Y PLACA (DETALLES DEL DECRETO) -->
+        <section class="bg-amber-50/60 border border-amber-200/70 rounded-2xl p-5 flex gap-4">
+            <div class="text-amber-600 mt-0.5">
+                <i data-lucide="info" class="w-5 h-5"></i>
             </div>
-            <div class="space-y-2">
-                <h3 class="text-lg font-bold text-amber-900">Alerta Pico y Placa - Restricciones Vigentes</h3>
-                <p class="text-sm text-amber-800 leading-relaxed">
-                    Recuerde que en la ciudad de Pasto la restricción aplica de <strong>Lunes a Viernes</strong> en el horario continuo de <strong>7:30 a.m. a 7:00 p.m.</strong> No aplica los fines de semana (sábados y domingos) ni los días festivos oficiales de Colombia. La restricción rige por igual para vehículos particulares, motocicletas y taxis.
+            <div class="space-y-1">
+                <h3 class="text-sm font-bold text-amber-900">Alerta Pico y Placa</h3>
+                <p class="text-xs text-amber-800/90 leading-relaxed font-medium">
+                    La restricción rige en la zona urbana de Pasto de <strong>Lunes a Viernes</strong> desde las <strong>7:30 a.m. hasta las 7:00 p.m.</strong> de forma continua. Sábados, domingos y días festivos oficiales no presentan restricción de circulación.
                 </p>
             </div>
         </section>
 
         <!-- BOTÓN AYÚDANOS A MEJORAR -->
-        <section class="text-center pt-4">
-            <a href="mailto:soporte@zodion.com?subject=Sugerencia%20Pico%20y%20Placa%20Pasto" class="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-indigo-600 font-medium transition-colors">
-                <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-500"></i> Ayúdanos a mejorar
+        <footer class="text-center pt-2 pb-8">
+            <a href="mailto:contacto@tuapp.com" class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-600 font-semibold transition-colors">
+                <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-500 fill-rose-500"></i> Ayúdanos a mejorar
             </a>
-        </section>
+        </footer>
 
     </main>
 
-    <!-- LOGICA DEL SISTEMA (JAVASCRIPT) -->
+    <!-- CONTROLADOR LÓGICO JAVASCRIPT -->
     <script>
-        // 1. Base de datos de Festivos Colombia 2026
+        // Calendario oficial de Festivos Colombia 2026
         const festivos2026 = [
             "2026-01-01", "2026-01-05", "2026-01-06", "2026-03-23", 
             "2026-04-02", "2026-04-03", "2026-05-01", "2026-05-18", 
@@ -103,7 +106,7 @@
             "2026-12-08", "2026-12-25"
         ];
 
-        // Secuencia cíclica de pares de placas
+        // Secuencia cíclica estándar de pares de placas en Pasto
         const secuenciaPlacas = [
             [2, 3], // Índice 0
             [4, 5], // Índice 1
@@ -112,172 +115,191 @@
             [0, 1]  // Índice 4
         ];
 
-        // Punto de referencia de calibración exacta según tus ejemplos:
-        // Domingo 1 de Feb (No cuenta). Lunes 2 de Feb = [2,3] (Índice 0)
-        const fechaReferencia = new Date(2026, 1, 2); // 2 de Febrero de 2026 (Mes 1 en JS)
-        const indiceReferencia = 0; // Corresponde al par [2,3]
+        // Punto de anclaje de calibración matemática (Lunes 2 de Febrero de 2026 es [2,3])
+        const fechaReferencia = new Date(2026, 1, 2); 
+        const indiceReferencia = 0;
 
-        let fechaActualPuntero = new Date(2026, 0, 1); // Empezamos a renderizar desde el 1 de Enero de 2026
-        const diasAMostrarPorCarga = 7;
+        // ESTABLECER EL PUNTERO EN LA FECHA ACTUAL REAL DEL USUARIO
+        let fechaActualPuntero = new Date();
+        
+        // Forzar que el año se mantenga en el entorno del framework 2026 si la fecha difiere
+        if (fechaActualPuntero.getFullYear() !== 2026) {
+            fechaActualPuntero = new Date(2026, 4, 18); // Default de consistencia en mayo 2026
+        }
 
-        // Función matemática fundamental para calcular los dígitos de cualquier fecha en 2026
+        const diasAMostrarPorCarga = 6; // Carga progresiva equivalente a una semana hábil + sábado
+
+        // Motor de cálculo de rotación
         function calcularPlacasParaFecha(fechaObjetivo) {
             let fechaAux = new Date(fechaReferencia);
             let diasValidos = 0;
 
-            if (fechaObjetivo >= fechaReferencia) {
-                // Si la fecha es posterior o igual a la referencia
-                while (fechaAux < fechaObjetivo) {
-                    if (fechaAux.getDay() !== 0) { // Si NO es domingo, cuenta para la rotación
-                        diasValidos++;
-                    }
+            const fObjNorm = new Date(fechaObjetivo.getFullYear(), fechaObjetivo.getMonth(), fechaObjetivo.getDate());
+            const fRefNorm = new Date(fechaReferencia.getFullYear(), fechaReferencia.getMonth(), fechaReferencia.getDate());
+
+            if (fObjNorm >= fRefNorm) {
+                while (fechaAux < fObjNorm) {
+                    if (fechaAux.getDay() !== 0) diasValidos++; // Ignorar domingos
                     fechaAux.setDate(fechaAux.getDate() + 1);
                 }
-                let indiceFinal = (indiceReferencia + diasValidos) % 5;
-                return secuenciaPlacas[indiceFinal];
+                return secuenciaPlacas[(indiceReferencia + diasValidos) % 5];
             } else {
-                // Si la fecha es anterior al 2 de febrero (Enero 2026)
-                while (fechaAux > fechaObjetivo) {
+                while (fechaAux > fObjNorm) {
                     fechaAux.setDate(fechaAux.getDate() - 1);
-                    if (fechaAux.getDay() !== 0) {
-                        diasValidos++;
-                    }
+                    if (fechaAux.getDay() !== 0) diasValidos++;
                 }
-                let indiceFinal = (indiceReferencia - (diasValidos % 5) + 5) % 5;
-                return secuenciaPlacas[indiceFinal];
+                return secuenciaPlacas[(indiceReferencia - (diasValidos % 5) + 5) % 5];
             }
         }
 
-        // Formatea la fecha local correctamente sin desfases de zona horaria
         function formatearFechaISO(date) {
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd}`;
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         }
 
-        // Genera y renderiza los días en la interfaz
+        function capitalizar(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Renderiza el bloque destacado del día de hoy en la parte superior
+        function inicializarDiaHoy() {
+            const contenedorHoy = document.getElementById('estado-hoy');
+            const hoy = new Date();
+            
+            // Forzar fecha del sistema para consistencia si es necesario
+            if (hoy.getFullYear() !== 2026) hoy.setTime(new Date(2026, 4, 18).getTime());
+
+            const fISO = formatearFechaISO(hoy);
+            const diaSemana = hoy.getDay();
+            const esFestivo = festivos2026.includes(fISO);
+            const digitos = calcularPlacasParaFecha(hoy);
+
+            let operaPicoYPlaca = (diaSemana !== 0 && diaSemana !== 6 && !esFestivo);
+            
+            let opcionesDia = { weekday: 'long', day: 'numeric', month: 'long' };
+            let textoFecha = capitalizar(hoy.toLocaleDateString('es-CO', opcionesDia));
+
+            if (operaPicoYPlaca) {
+                contenedorHoy.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-md uppercase tracking-wider">Hoy Activo</span>
+                            <h3 class="text-2xl font-black text-slate-950 mt-2">${textoFecha}</h3>
+                            <p class="text-xs text-slate-400 font-medium mt-1">Horario continuo: 7:30 a.m. a 7:00 p.m.</p>
+                        </div>
+                        <div class="flex gap-1 bg-slate-900 p-1.5 rounded-xl border border-slate-800 shadow-inner">
+                            <span class="w-12 h-12 bg-amber-400 text-slate-950 rounded-lg flex items-center justify-center font-black text-2xl shadow-sm">${digitos[0]}</span>
+                            <span class="w-12 h-12 bg-amber-400 text-slate-950 rounded-lg flex items-center justify-center font-black text-2xl shadow-sm">${digitos[1]}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                let razon = esFestivo ? "Día Festivo Oficial" : (diaSemana === 0 ? "Domingo" : "Sábado");
+                contenedorHoy.innerHTML = `
+                    <div>
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider">Libre Circulación</span>
+                        <h3 class="text-2xl font-black text-slate-950 mt-2">${textoFecha}</h3>
+                        <p class="text-sm text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-emerald-500"></i> No aplica restricción por ser <strong>${razon}</strong>.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Renderiza las filas del listado cronológico hacia adelante
         function cargarMasDias() {
             const contenedor = document.getElementById('contenedor-calendario');
-            
-            const opcionesFecha = { weekday: 'long', day: 'numeric', month: 'long' };
+            const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
 
             for (let i = 0; i < diasAMostrarPorCarga; i++) {
                 const fISO = formatearFechaISO(fechaActualPuntero);
-                const diaSemana = fechaActualPuntero.getDay(); 
+                const diaSemana = fechaActualPuntero.getDay();
                 const esFestivo = festivos2026.includes(fISO);
-                const esDomingo = (diaSemana === 0);
-                const esSabado = (diaSemana === 6);
-
-                // Obtener los dígitos que corresponden por rotación matemática pura
+                
                 const digitos = calcularPlacasParaFecha(fechaActualPuntero);
+                let aplica = (diaSemana !== 0 && diaSemana !== 6 && !esFestivo);
 
-                // Determinar si HOY se aplica o no la multa
-                let aplicaRestriccion = true;
-                let causaNoAplica = "";
+                let textoDia = capitalizar(fechaActualPuntero.toLocaleDateString('es-CO', opciones));
+                
+                const divFila = document.createElement('div');
+                divFila.className = `p-3.5 rounded-xl border flex justify-between items-center transition-all bg-white ${aplica ? 'border-slate-100 hover:border-slate-300 shadow-sm' : 'border-slate-100 bg-slate-50/40 opacity-70'}`;
 
-                if (esDomingo) {
-                    aplicaRestriccion = false;
-                    causaNoAplica = "Domingo sin restricción";
-                } else if (esSabado) {
-                    aplicaRestriccion = false;
-                    causaNoAplica = "Sábado sin restricción";
-                } else if (esFestivo) {
-                    aplicaRestriccion = false;
-                    causaNoAplica = "Día Festivo oficial";
-                }
-
-                // Dar formato al texto del día
-                let nombreDia = fechaActualPuntero.toLocaleDateString('es-CO', opcionesFecha);
-                nombreDia = nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1);
-
-                // Crear elemento HTML estructurado al estilo PyPHoy
-                const divDia = document.createElement('div');
-                divDia.className = `p-4 rounded-xl border transition-all flex justify-between items-center bg-white ${aplicaRestriccion ? 'border-gray-200 hover:border-indigo-300 shadow-sm' : 'border-gray-100 bg-gray-50/50 opacity-75'}`;
-
-                let bloquePlacasHTML = "";
-                if (aplicaRestriccion) {
-                    bloquePlacasHTML = `
-                        <div class="flex gap-1.5">
-                            <span class="w-10 h-10 bg-amber-400 text-slate-900 rounded-lg flex items-center justify-center font-black text-xl shadow-sm border border-amber-500">${digitos[0]}</span>
-                            <span class="w-10 h-10 bg-amber-400 text-slate-900 rounded-lg flex items-center justify-center font-black text-xl shadow-sm border border-amber-500">${digitos[1]}</span>
+                let BadgeOPlacas = "";
+                if (aplica) {
+                    BadgeOPlacas = `
+                        <div class="flex gap-1">
+                            <span class="w-8 h-8 bg-amber-400 text-slate-950 rounded-md flex items-center justify-center font-extrabold text-base border border-amber-500/30">${digitos[0]}</span>
+                            <span class="w-8 h-8 bg-amber-400 text-slate-950 rounded-md flex items-center justify-center font-extrabold text-base border border-amber-500/30">${digitos[1]}</span>
                         </div>
                     `;
                 } else {
-                    bloquePlacasHTML = `
-                        <span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gray-200 text-gray-500 border border-gray-300 uppercase tracking-wider">${causaNoAplica}</span>
+                    let tagText = esFestivo ? "Festivo" : (diaSemana === 0 ? "Domingo" : "Sábado");
+                    BadgeOPlacas = `
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-slate-200/80 text-slate-500 uppercase tracking-wide border border-slate-300/40">${tagText}</span>
                     `;
                 }
 
-                divDia.innerHTML = `
-                    <div class="space-y-0.5">
-                        <p class="font-bold text-gray-900 text-base">${nombreDia}</p>
-                        <p class="text-xs text-gray-400">${aplicaRestriccion ? 'Horario: 7:30 a.m. - 7:00 p.m.' : 'Libre circulación'}</p>
-                    </div>
+                divFila.innerHTML = `
                     <div>
-                        ${bloquePlacasHTML}
+                        <p class="font-bold text-slate-900 text-sm">${textoDia}</p>
+                        <p class="text-[11px] text-slate-400 font-medium">${aplica ? '7:30 a.m. - 7:00 p.m.' : 'Sin restricción'}</p>
                     </div>
+                    <div>${BadgeOPlacas}</div>
                 `;
 
-                contenedor.appendChild(divDia);
+                contenedor.appendChild(divFila);
                 
-                // Avanzar el puntero un día hacia adelante
+                // Mover el puntero al día siguiente
                 fechaActualPuntero.setDate(fechaActualPuntero.getDate() + 1);
             }
-            // Inicializar iconos de Lucide cargados dinámicamente
             lucide.createIcons();
         }
 
-        // Función del buscador de placa específica (¿Cuándo tengo pico y placa?)
+        // Buscador interactivo por número de placa específica
         function buscarPorPlaca(digito) {
             const resultadoDiv = document.getElementById('resultado-busqueda');
             resultadoDiv.classList.remove('hidden');
             
-            // Buscaremos las próximas ocurrencias reales desde el inicio del año
-            let fechaBusqueda = new Date(2026, 0, 1);
-            let fechasEncontradas = [];
+            let trackerBusqueda = new Date();
+            if (trackerBusqueda.getFullYear() !== 2026) trackerBusqueda.setTime(new Date(2026, 4, 18).getTime());
+
+            let resultadosFiltrados = [];
             const opcionesBusqueda = { weekday: 'long', day: 'numeric', month: 'long' };
 
-            // Analizamos los primeros 45 días del año para encontrar coincidencias operativas
-            for (let d = 0; d < 45; d++) {
-                const fISO = formatearFechaISO(fechaBusqueda);
-                const diaSemana = fechaBusqueda.getDay();
+            // Analizar los siguientes 30 días calendario
+            for (let d = 0; d < 30; d++) {
+                const fISO = formatearFechaISO(trackerBusqueda);
+                const diaSemana = trackerBusqueda.getDay();
                 const esFestivo = festivos2026.includes(fISO);
-                
-                // Solo nos interesan días donde SÍ aplique la restricción efectivamente
+
                 if (diaSemana !== 0 && diaSemana !== 6 && !esFestivo) {
-                    const digitos = calcularPlacasParaFecha(fechaBusqueda);
+                    const digitos = calcularPlacasParaFecha(trackerBusqueda);
                     if (digitos.includes(digito)) {
-                        let formatoTexto = fechaBusqueda.toLocaleDateString('es-CO', opcionesBusqueda);
-                        formatoTexto = formatoTexto.charAt(0).toUpperCase() + formatoTexto.slice(1);
-                        fechasEncontradas.push(formatoTexto);
+                        let formatoTexto = capitalizar(trackerBusqueda.toLocaleDateString('es-CO', opcionesBusqueda));
+                        resultadosFiltrados.push(formatoTexto);
                     }
                 }
-                fechaBusqueda.setDate(fechaBusqueda.getDate() + 1);
+                trackerBusqueda.setDate(trackerBusqueda.getDate() + 1);
             }
 
-            // Mostrar el resultado de forma elegante en la interfaz
             resultadoDiv.innerHTML = `
-                <div class="flex items-center gap-2 mb-2 text-indigo-950 font-bold">
-                    <i data-lucide="info" class="w-4 h-4 text-indigo-600"></i>
-                    <span>Próximos días de restricción para el dígito <span class="bg-indigo-600 text-white px-2 py-0.5 rounded">${digito}</span>:</span>
+                <div class="flex items-center gap-1.5 mb-2 text-slate-900 font-bold text-xs uppercase tracking-wider">
+                    <i data-lucide="calendar-check" class="w-4 h-4 text-indigo-600"></i>
+                    <span>Próximas restricciones para placa terminada en [${digito}]:</span>
                 </div>
-                <ul class="space-y-1 text-sm text-indigo-900 pl-6 list-disc font-medium">
-                    ${fechasEncontradas.slice(0, 3).map(f => `<li>${f}</li>`).join('')}
+                <ul class="space-y-1.5 text-sm text-slate-700 pl-5 list-disc font-semibold">
+                    ${resultadosFiltrados.slice(0, 3).map(f => `<li>${f}</li>`).join('')}
                 </ul>
-                <p class="text-[11px] text-indigo-500 mt-2 italic">*No se incluyen fines de semana ni festivos.</p>
             `;
             lucide.createIcons();
         }
 
-        // Ejecutar la primera carga de días al abrir la app
+        // Inicialización coordinada de la app al cargar la ventana
         window.onload = function() {
+            inicializarDiaHoy();
             cargarMasDias();
         };
     </script>
 </body>
 </html>
-
-
-
 
